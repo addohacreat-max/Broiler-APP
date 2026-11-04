@@ -31,7 +31,7 @@ nav button.on{color:var(--pri);background:var(--bg);border-inline-start-color:va
 <div id="app"></div>
 <script>
 // ===== إعداد Supabase: ضع القيم هنا (Project Settings → API) =====
-const SUPABASE_URL = "", SUPABASE_KEY = "";
+const SUPABASE_URL = "https://uewwceuwjhxccujbdegx.supabase.co", SUPABASE_KEY = "sb_publishable_kEeGEBFCSMT25qfiy15x0g_TLInju2K";
 const cfg = { u: SUPABASE_URL || localStorage.sbu || "", k: SUPABASE_KEY || localStorage.sbk || "" };
 const $ = s => document.querySelector(s), app = $("#app"), n = (x, d = 0) => x == null ? "–" : (+x).toLocaleString("en", {maximumFractionDigits: d});
 let sb, cycles = [], cur, houses = [], sum = [], tab = "dash";
