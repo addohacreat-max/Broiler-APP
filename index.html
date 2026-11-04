@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>الدهاء للدواجن – إدارة الدورات</title>
+<title>شركة دواجن الدوحة – إدارة الدورات</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -39,7 +39,7 @@ let sb, cycles = [], cur, houses = [], sum = [], tab = "dash";
 
 const LANG = localStorage.lang || "ar", EN = LANG == "en";
 const nz = x => x.replace(/\uFE0F/g, "").trim();
-const D = {"🐔 الدهاء للدواجن":"🐔 ADDOHA Poultry","خروج":"Logout","تسجيل الدخول":"Sign in","البريد الإلكتروني":"Email","كلمة المرور":"Password","دخول":"Sign in","ربط Supabase":"Connect Supabase","حفظ":"Save",
+const D = {"🐔 شركة دواجن الدوحة":"🐔 Addoha Poultry Company","خروج":"Logout","تسجيل الدخول":"Sign in","البريد الإلكتروني":"Email","كلمة المرور":"Password","دخول":"Sign in","ربط Supabase":"Connect Supabase","حفظ":"Save",
 "البريد غير مسجل أو كلمة المرور خاطئة":"Unknown email or wrong password","الحساب غير مؤكد: فعّل Confirm user من Supabase":"Account not confirmed: use Confirm user in Supabase",
 "اللوحة":"Dashboard","إدخال يومي":"Daily entry","علف/صحة/مخزون":"Feed / Health / Stock","التقارير":"Reports","الدورات":"Cycles",
 "إجمالي الكتاكيت":"Total chicks","النفوق":"Mortality","نسبة النفوق %":"Mortality %","المباع":"Sold","العلف المستهلك (طن)":"Feed consumed (t)","متوسط FCR":"Average FCR",
@@ -63,7 +63,7 @@ const D = {"🐔 الدهاء للدواجن":"🐔 ADDOHA Poultry","خروج":"
 "كل المزارع":"All farms","كل الدورات":"All cycles","من تاريخ":"From date","إلى تاريخ":"To date","اسم الطبيب":"Veterinarian","الكل":"All","مطلوب":"Required","غير مطلوب":"Not required","فحص معملي":"Lab test",
 "🔍 عرض":"🔍 Show","📗 تصدير Excel":"📗 Export Excel","📕 تصدير PDF":"📕 Export PDF","زيارة":"visits","سجل عنبر":"house records","لا توجد زيارات مطابقة":"No matching visits","تقرير الزيارات البيطرية":"Veterinary visits report",
 "الطبيب":"Veterinarian","الملاحظات":"Notes","الفحص المعملي":"Lab test","لا توجد بيانات للتصدير":"No data to export","تعذر تحميل مكتبة Excel (تحقق من الإنترنت)":"Could not load the Excel library (check your connection)",
-"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","المعمل":"Laboratory","📥 طلبات الفحص":"📥 Test requests","🗓️ الجدولة والبروتوكول":"🗓️ Scheduling & protocol","📋 تقرير المعمل":"📋 Lab report","تقرير المعمل":"Laboratory report","طلب بيطري":"Vet request","فحص مجدول":"Scheduled test",
+"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","ملف النتيجة (PDF)":"Result file (PDF)","📎 عرض الملف":"📎 View file","🗑 إزالة الملف":"🗑 Remove file","ملف PDF فقط (حتى 10 ميجابايت)":"PDF files only (up to 10 MB)","أزل ملف النتيجة؟":"Remove the result file?","⚠️ تعذر إرسال تنبيه البريد":"⚠️ Could not send the email alert","⚠️ نفوق مرتفع! تم إرسال تنبيه بالبريد":"⚠️ High mortality! An email alert was sent","المعمل":"Laboratory","📥 طلبات الفحص":"📥 Test requests","🗓️ الجدولة والبروتوكول":"🗓️ Scheduling & protocol","📋 تقرير المعمل":"📋 Lab report","تقرير المعمل":"Laboratory report","طلب بيطري":"Vet request","فحص مجدول":"Scheduled test",
 "قيد الانتظار":"Pending","مكتمل":"Completed","سلبي":"Negative","إيجابي":"Positive","مشتبه":"Suspected","طبيب المعمل":"Lab doctor","تاريخ الفحص":"Test date","تاريخ النتيجة":"Result date","التقييم":"Outcome","النتيجة":"Result","ملاحظات المعمل":"Lab notes",
 "💾 حفظ النتيجة":"💾 Save result","المصدر":"Source","تاريخ الطلب:":"Requested:","تاريخ الجدولة:":"Scheduled:","العرض المسجّل:":"Vet finding:","جدولة فحص":"Schedule a test","نوع الفحص":"Test type","تاريخ الفحص المجدول":"Scheduled date","البيوت":"Houses",
 "➕ إضافة للجدول":"➕ Add to schedule","بروتوكول الفحوصات":"Test protocol","العمر (يوم)":"Age (days)","➕ إضافة للبروتوكول":"➕ Add to protocol","⚙️ توليد الفحوصات حسب البروتوكول":"⚙️ Generate tests from protocol",
@@ -84,7 +84,7 @@ const langBtn = (st = "") => `<button class="ghost" style="${st}" onclick="local
 const _al = window.alert; window.alert = m => _al(EN ? tr(String(m)) : m);
 const _pr = window.prompt; window.prompt = m => _pr(EN ? tr(String(m)) : m);
 const _cf = window.confirm; window.confirm = m => _cf(EN ? tr(String(m)) : m);
-if (EN) { document.documentElement.lang = "en"; document.documentElement.dir = "ltr"; document.title = "ADDOHA Poultry – Cycle Management"; new MutationObserver(() => trAll(app)).observe(app, {childList: true, subtree: true, characterData: true}); }
+if (EN) { document.documentElement.lang = "en"; document.documentElement.dir = "ltr"; document.title = "Addoha Poultry Company – Cycle Management"; new MutationObserver(() => trAll(app)).observe(app, {childList: true, subtree: true, characterData: true}); }
 if (!cfg.u) { app.innerHTML = `<div id="login" class="card">${langBtn("justify-self:end")}<h3>ربط Supabase</h3><input id="u" placeholder="Project URL"><input id="k" placeholder="anon public key"><button onclick="localStorage.sbu=u.value.trim();localStorage.sbk=k.value.trim();location.reload()">حفظ</button></div>`; }
 else { sb = supabase.createClient(cfg.u, cfg.k); sb.auth.getSession().then(({data}) => data.session ? start() : loginUI()); }
 
@@ -95,7 +95,7 @@ function loginUI() {
 async function start(sel) {
   const {data} = await sb.from("cycles").select("id,cycle_no,start_date,farms(name)").order("start_date", {ascending: false});
   await loadFarms(); cycles = data || []; cur = sel || cycles[0]?.id; if (!cycles.length) tab = "setup";
-  app.innerHTML = `<header><h1>🐔 الدهاء للدواجن</h1><select id="cy">${cycles.map(c => `<option value="${c.id}">${c.farms.name} – دورة ${c.cycle_no}</option>`).join("")}</select>${langBtn("color:#fff;border-color:#fff")}<button class="ghost" style="color:#fff;border-color:#fff" onclick="sb.auth.signOut().then(loginUI)">خروج</button></header><main id="m"></main>
+  app.innerHTML = `<header><h1>🐔 شركة دواجن الدوحة</h1><select id="cy">${cycles.map(c => `<option value="${c.id}">${c.farms.name} – دورة ${c.cycle_no}</option>`).join("")}</select>${langBtn("color:#fff;border-color:#fff")}<button class="ghost" style="color:#fff;border-color:#fff" onclick="sb.auth.signOut().then(loginUI)">خروج</button></header><main id="m"></main>
   <nav>${[["dash","اللوحة"],["entry","إدخال يومي"],["rec","علف/صحة/مخزون"],["vet","الرعاية الصحية"],["lab","المعمل"],["rep","التقارير"],["setup","الدورات"]].map(([t, l]) => `<button data-t="${t}" title="${l}"><b class="ic"><svg viewBox="0 0 24 24">${ICONS[t]}</svg></b><span>${l}</span></button>`).join("")}</nav>`;
   $("#cy").onchange = e => { cur = e.target.value; load(); };
   document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.t; pf = ""; render(); });
@@ -146,7 +146,7 @@ async function dash() {
 }
 async function entry() {
   const c = cycles.find(x => x.id == cur), today = new Date().toISOString().slice(0, 10);
-  $("#m").innerHTML = `<div class="row"><b>التاريخ:</b><input type="date" id="dt" value="${today}"><button id="sv">💾 حفظ الكل</button><span id="msg"></span></div><div class="hs" id="hs"></div>`;
+  $("#m").innerHTML = `<div class="row"><b>التاريخ:</b><input type="date" id="dt" value="${today}"><button id="sv">💾 حفظ الكل</button><span id="msg"></span><span id="msg2" class="bad"></span></div><div class="hs" id="hs"></div>`;
   const fill = async () => {
     const {data} = await sb.from("daily_records").select("*").eq("rec_date", $("#dt").value).in("house_id", houses.map(h => h.id));
     const m = Object.fromEntries((data || []).map(r => [r.house_id, r]));
@@ -156,13 +156,15 @@ async function entry() {
       <label>متوسط الوزن (جم)</label><input type="number" inputmode="decimal" min="0" data-f="avg_weight_g" value="${r.avg_weight_g ?? ""}">
       <label>المباع (طائر)</label><input type="number" inputmode="numeric" min="0" data-f="sold" value="${r.sold ?? ""}"></div>`; }).join("");
   };
-  $("#dt").onchange = fill; await fill();
+  const hl = () => document.querySelectorAll('[data-f="mortality"]').forEach(i => { const f = () => i.style.borderColor = +i.value > ALERT_MORT ? "var(--bad)" : ""; i.oninput = f; f(); }); $("#dt").onchange = async () => { await fill(); hl(); }; await fill(); hl();
   $("#sv").onclick = async () => {
     const age = Math.round((new Date($("#dt").value) - new Date(c.start_date)) / 864e5), rows = [];
     document.querySelectorAll("[data-h]").forEach(el => { const o = {house_id: el.dataset.h, rec_date: $("#dt").value, age}; let any = false;
       el.querySelectorAll("input").forEach(i => { if (i.value !== "") { o[i.dataset.f] = +i.value; any = true; } }); if (any) rows.push(o); });
     const {error} = await sb.from("daily_records").upsert(rows, {onConflict: "house_id,rec_date"});
-    $("#msg").textContent = error ? "❌ " + error.message : `✅ تم حفظ ${rows.length} عنبر`; if (!error) load.call(null, tab = "entry");
+    $("#msg").textContent = error ? "❌ " + error.message : `✅ تم حفظ ${rows.length} عنبر`; $("#msg2").textContent = "";
+    if (error) return; refreshSum();
+    if (rows.some(r => r.mortality > ALERT_MORT)) { const {error: fe} = await sb.functions.invoke("notify-mortality", {body: {cycle_id: cur, date: $("#dt").value, lang: LANG}}); if (fe) console.warn(fe); $("#msg2").textContent = fe ? " ⚠️ تعذر إرسال تنبيه البريد" : " ⚠️ نفوق مرتفع! تم إرسال تنبيه بالبريد"; }
   };
 }
 function rep() {
@@ -174,7 +176,7 @@ function rep() {
   <h2>السجل اليومي لعنبر</h2><div class="row"><select id="hh">${houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join("")}</select></div><div class="card tw" id="dl"></div>`;
   $("#csv").onclick = () => { const b = new Blob(["\ufeff" + [hd, ...body].map(r => r.map(c => '"' + (EN ? tr(String(c)) : c) + '"').join(",")).join("\n")], {type: "text/csv"}), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "cycle-report.csv"; a.click(); };
   const daily = async () => { const {data} = await sb.from("daily_records").select("*").eq("house_id", $("#hh").value).order("rec_date"); let cum = 0;
-    $("#dl").innerHTML = `<table><tr><th>التاريخ</th><th>العمر</th><th>النفوق</th><th>التراكمي</th><th>العلف</th><th>الوزن جم</th><th>المباع</th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.age}</td><td>${r.mortality}</td><td>${cum += r.mortality}</td><td>${n(r.feed_kg)}</td><td>${n(r.avg_weight_g)}</td><td>${r.sold}</td></tr>`).join("")}</table>`; };
+    $("#dl").innerHTML = `<table><tr><th>التاريخ</th><th>العمر</th><th>النفوق</th><th>التراكمي</th><th>العلف</th><th>الوزن جم</th><th>المباع</th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.age}</td><td style="${mcol(r.mortality)}">${r.mortality}</td><td>${cum += r.mortality}</td><td>${n(r.feed_kg)}</td><td>${n(r.avg_weight_g)}</td><td>${r.sold}</td></tr>`).join("")}</table>`; };
   $("#hh").onchange = daily; daily();
 }
 function setup() {
@@ -182,7 +184,7 @@ function setup() {
   <div><label>تاريخ استلام الكتاكيت</label><input type="date" id="sd" value="${new Date().toISOString().slice(0, 10)}"></div><div><label>المدير</label><input id="sm"></div>
   <div><label>عدد العنابر</label><input type="number" id="sn" value="12"></div><div><label>كتاكيت لكل عنبر</label><input type="number" id="sk" value="25000"></div></div>
   <div class="row" style="margin-top:10px"><button id="mk">➕ إنشاء الدورة</button><span id="ms"></span></div>
-  ${houses.length ? `<h2>أعداد الكتاكيت في العنابر الحالية</h2><div class="hs">${houses.map(h => `<div class="card"><b>عنبر ${h.no}</b><label>عدد الكتاكيت</label><input type="number" data-hid="${h.id}" value="${h.chicks ?? 0}"></div>`).join("")}</div><div class="row" style="margin-top:10px"><button id="sh">💾 حفظ الأعداد</button></div>` : ""}`;
+  ${houses.length ? `<h2>أعداد الكتاكيت في العنابر الحالية</h2><datalist id="srcs">${[...new Set(houses.map(h => h.chick_source).filter(Boolean))].map(x => `<option value="${esc(x)}">`).join("")}</datalist><div class="hs">${houses.map(h => `<div class="card" data-hc="${h.id}"><b>عنبر ${h.no}</b><label>عدد الكتاكيت</label><input type="number" data-f="chicks" value="${h.chicks ?? 0}"><label>المصدر</label><input data-f="chick_source" list="srcs" value="${esc(h.chick_source || "")}"><label>ملاحظات</label><textarea data-f="notes" rows="2">${esc(h.notes)}</textarea></div>`).join("")}</div><div class="row" style="margin-top:10px"><button id="sh">💾 حفظ الأعداد</button></div>` : ""}`;
   $("#mk").onclick = async () => {
     const fid = $("#sf").value, no = $("#sc").value.trim(), er = m => $("#ms").textContent = "❌ " + m;
     if (!fid || !no || !$("#sd").value) return er("أكمل الحقول المطلوبة");
@@ -193,7 +195,7 @@ function setup() {
     if (h.error) return er(h.error.message);
     tab = "entry"; start(c.data.id);
   };
-  if ($("#sh")) $("#sh").onclick = async () => { for (const i of document.querySelectorAll("[data-hid]")) await sb.from("houses").update({chicks: +i.value}).eq("id", i.dataset.hid); await load(); alert("تم الحفظ"); };
+  if ($("#sh")) $("#sh").onclick = async () => { for (const c of document.querySelectorAll("[data-hc]")) { const o = {}; c.querySelectorAll("[data-f]").forEach(i => o[i.dataset.f] = i.dataset.f == "chicks" ? +i.value : (i.value.trim() || null)); const {error} = await sb.from("houses").update(o).eq("id", c.dataset.hc); if (error) return alert("❌ " + error.message); } await load(); alert("تم الحفظ"); };
 }
 let sub = "feed";
 const inp = (id, l, t = "text", v = "") => `<div><label>${l}</label><input id="${id}" type="${t}" value="${v}" ${t == "number" ? 'step="any" inputmode="decimal"' : ""}></div>`;
@@ -314,21 +316,37 @@ async function addFarm() {
 }
 // ===== المعمل =====
 const SRC = [["visit", "طلب بيطري"], ["scheduled", "فحص مجدول"]], OUT = [["", "قيد الانتظار"], ["negative", "سلبي"], ["positive", "إيجابي"], ["suspect", "مشتبه"], ["other", "أخرى"]], LT = LAB.slice(1);
-const LQ = "id,source,farm_id,cycle_id,house_id,test_type,requested_date,scheduled_date,test_date,result_date,outcome,result,lab_notes,lab_doctor,symptom,vet_notes,farms(name),cycles(cycle_no),houses(no)";
+const LQ = "id,source,farm_id,cycle_id,house_id,test_type,requested_date,scheduled_date,test_date,result_date,outcome,result,lab_notes,lab_doctor,symptom,vet_notes,pdf_path,farms(name),cycles(cycle_no),houses(no)";
 const isDone = t => !!t.result_date, refD = t => t.test_date || t.requested_date || t.scheduled_date || "";
 let lsub = "tests", lrows = [];
-const lcard = t => `<div class="card" data-lt="${t.id}"><div class="vhd"><b>${esc((t.farms || {}).name)}</b><span>دورة ${(t.cycles || {}).cycle_no || ""}</span><span>عنبر ${(t.houses || {}).no || ""}</span></div>
-  <div class="vhd"><span class="${isDone(t) ? "" : "bad"}">${isDone(t) ? "مكتمل" : "قيد الانتظار"}</span><span class="k">${lbl(SRC, t.source)}</span><b>${lbl(LAB, t.test_type)}</b><span class="k"><span>${t.source == "visit" ? "تاريخ الطلب:" : "تاريخ الجدولة:"}</span> ${t.requested_date || t.scheduled_date || ""}</span></div>
+const lcard = t => `<div class="card" data-lt="${t.id}" data-pdf="${t.pdf_path || ""}"><div class="vhd"><b>${esc((t.farms || {}).name)}</b><span>دورة ${(t.cycles || {}).cycle_no || ""}</span><span>عنبر ${(t.houses || {}).no || ""}</span></div>
+  <div class="vhd"><span class="${isDone(t) ? "" : "bad"}">${isDone(t) ? "مكتمل" : "قيد الانتظار"}</span>${t.pdf_path ? "<span>📎</span>" : ""}<span class="k">${lbl(SRC, t.source)}</span><b>${lbl(LAB, t.test_type)}</b><span class="k"><span>${t.source == "visit" ? "تاريخ الطلب:" : "تاريخ الجدولة:"}</span> ${t.requested_date || t.scheduled_date || ""}</span></div>
   ${t.symptom || t.vet_notes ? `<div class="k" style="margin-bottom:6px"><span>العرض المسجّل:</span> <b>${lbl(SYM, t.symptom)}</b> <i>${esc(t.vet_notes)}</i></div>` : ""}
   <label>طبيب المعمل</label><input data-f="lab_doctor" value="${esc(t.lab_doctor || localStorage.labName || "")}">
   <label>تاريخ الفحص</label><input type="date" data-f="test_date" value="${t.test_date || ""}"><label>تاريخ النتيجة</label><input type="date" data-f="result_date" value="${t.result_date || ""}">
   <label>التقييم</label><select data-f="outcome">${po(OUT).replace(`value="${t.outcome || ""}"`, `value="${t.outcome || ""}" selected`)}</select>
   <label>النتيجة</label><textarea data-f="result" rows="2">${esc(t.result)}</textarea><label>ملاحظات المعمل</label><textarea data-f="lab_notes" rows="2">${esc(t.lab_notes)}</textarea>
-  <div class="row" style="margin:8px 0 0"><button onclick="saveLab(this)">💾 حفظ النتيجة</button></div></div>`;
+  <label>ملف النتيجة (PDF)</label><input type="file" accept="application/pdf" data-file>${t.pdf_path ? `<div class="row" style="margin:6px 0"><button type="button" class="ghost" onclick="openPdf('${t.pdf_path}')">📎 عرض الملف</button><button type="button" class="ghost" onclick="rmPdf('${t.id}','${t.pdf_path}')">🗑 إزالة الملف</button></div>` : ""}<div class="row" style="margin:8px 0 0"><button onclick="saveLab(this)">💾 حفظ النتيجة</button></div></div>`;
 async function saveLab(b) {
   const el = b.closest("[data-lt]"), o = {}; el.querySelectorAll("[data-f]").forEach(i => o[i.dataset.f] = i.value.trim() || null);
   if (o.lab_doctor) localStorage.labName = o.lab_doctor;
-  const {error} = await sb.from("lab_tests").update(o).eq("id", el.dataset.lt); if (error) return alert("❌ " + error.message); alert("✅ تم الحفظ"); render();
+  const fi = el.querySelector("[data-file]").files[0];
+  if (fi) {
+    if (fi.type != "application/pdf" || fi.size > 10485760) return alert("ملف PDF فقط (حتى 10 ميجابايت)");
+    const path = `lab/${el.dataset.lt}/${Date.now()}.pdf`, up = await sb.storage.from("lab-files").upload(path, fi, {contentType: "application/pdf"});
+    if (up.error) return alert("❌ " + up.error.message); o.pdf_path = path;
+  }
+  const {error} = await sb.from("lab_tests").update(o).eq("id", el.dataset.lt); if (error) return alert("❌ " + error.message);
+  if (o.pdf_path && el.dataset.pdf) await sb.storage.from("lab-files").remove([el.dataset.pdf]);
+  alert("✅ تم الحفظ"); render();
+}
+async function openPdf(path) {
+  const w = window.open("", "_blank"), {data, error} = await sb.storage.from("lab-files").createSignedUrl(path, 300);
+  if (error) { if (w) w.close(); return alert("❌ " + error.message); } if (w) w.location.href = data.signedUrl; else location.href = data.signedUrl;
+}
+async function rmPdf(id, path) {
+  if (!confirm("أزل ملف النتيجة؟")) return; await sb.storage.from("lab-files").remove([path]);
+  const {error} = await sb.from("lab_tests").update({pdf_path: null}).eq("id", id); if (error) return alert("❌ " + error.message); render();
 }
 async function lab() {
   const tabs = `<div class="row np">${[["tests", "📥 طلبات الفحص"], ["sched", "🗓️ الجدولة والبروتوكول"], ["lrep", "📋 تقرير المعمل"]].map(([k, l]) => `<button class="${lsub == k ? "" : "ghost"}" onclick="lsub='${k}';render()">${l}</button>`).join("")}</div>`;
@@ -390,6 +408,13 @@ async function lab() {
   }
 }
 const LH = ["التاريخ", "المزرعة", "الدورة", "العنبر", "نوع الفحص", "المصدر", "تاريخ الفحص", "تاريخ النتيجة", "التقييم", "النتيجة", "ملاحظات المعمل", "طبيب المعمل"];
+
+const ALERT_MORT = 100, MORT_Y = [40, 60], MORT_R = 80;   // حدود التنبيه والتلوين (عدّلها هنا)
+const mcol = m => m > MORT_R ? "background:#d93025;color:#fff;font-weight:700" : m >= MORT_Y[0] && m <= MORT_Y[1] ? "background:#ffe066;color:#222;font-weight:700" : "";
+async function refreshSum() {
+  const {data} = await sb.from("house_summary").select("*").eq("cycle_id", cur).order("no");
+  sum = (data || []).map(r => ({...r, fcr: r.weight_kg ? r.feed_kg / ((r.chicks - r.mortality) * r.weight_kg) : null}));
+}
 </script>
 </body>
 </html>
