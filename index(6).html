@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الدهاء للدواجن – إدارة الدورات</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--tx:#1b2430;--mut:#6b7785;--pri:#1f7a4d;--bd:#dde3ea;--bad:#c0392b}
+@media(prefers-color-scheme:dark){:root{--bg:#12171c;--card:#1b232b;--tx:#e8edf2;--mut:#9aa7b4;--pri:#3cb87a;--bd:#2c3742;--bad:#ef6a5b}}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--tx);padding-bottom:70px}
+header{background:var(--pri);color:#fff;padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;flex:1}select,input,button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px}
+button{cursor:pointer;background:var(--pri);color:#fff;border:0;font-weight:600}button.ghost{background:transparent;color:var(--pri);border:1px solid var(--pri)}
+main{max-width:1100px;margin:auto;padding:14px}.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}.k{color:var(--mut);font-size:13px}.v{font-size:24px;font-weight:700;margin-top:4px}
+nav{position:fixed;bottom:0;inset-inline:0;background:var(--card);border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
+nav button{flex:1;background:none;color:var(--mut);border-radius:0;padding:14px 4px}nav button.on{color:var(--pri);border-top:3px solid var(--pri)}
+.hs{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.hs label{display:block;font-size:12px;color:var(--mut);margin-top:6px}.hs input{width:100%}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:640px}th,td{padding:8px;border-bottom:1px solid var(--bd);text-align:center;white-space:nowrap}th{background:var(--bg);position:sticky;top:0}
+.bad{color:var(--bad);font-weight:700}h2{margin:18px 0 10px;font-size:17px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+#login{max-width:340px;margin:12vh auto;display:grid;gap:10px}svg text{fill:var(--mut);font-size:10px}@media print{nav,header,.row{display:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ===== إعداد Supabase: ضع القيم هنا (Project Settings → API) =====
+const SUPABASE_URL = "https://uewwceuwjhxccujbdegx.supabase.co", SUPABASE_KEY = "sb_publishable_kEeGEBFCSMT25qfiy15x0g_TLInju2K";
+const cfg = { u: SUPABASE_URL || localStorage.sbu || "", k: SUPABASE_KEY || localStorage.sbk || "" };
+const $ = s => document.querySelector(s), app = $("#app"), n = (x, d = 0) => x == null ? "–" : (+x).toLocaleString("en", {maximumFractionDigits: d});
+let sb, cycles = [], cur, houses = [], sum = [], tab = "dash";
+
+if (!cfg.u) { app.innerHTML = `<div id="login" class="card"><h3>ربط Supabase</h3><input id="u" placeholder="Project URL"><input id="k" placeholder="anon public key"><button onclick="localStorage.sbu=u.value.trim();localStorage.sbk=k.value.trim();location.reload()">حفظ</button></div>`; }
+else { sb = supabase.createClient(cfg.u, cfg.k); sb.auth.getSession().then(({data}) => data.session ? start() : loginUI()); }
+
+function loginUI() {
+  app.innerHTML = `<div id="login" class="card"><h3>تسجيل الدخول</h3><input id="em" type="email" placeholder="البريد الإلكتروني"><input id="pw" type="password" placeholder="كلمة المرور"><button id="go">دخول</button><small id="er" class="bad"></small></div>`;
+  $("#go").onclick = async () => { const {error} = await sb.auth.signInWithPassword({email: $("#em").value, password: $("#pw").value}); error ? $("#er").textContent = ({"Invalid login credentials": "البريد غير مسجل أو كلمة المرور خاطئة", "Email not confirmed": "الحساب غير مؤكد: فعّل Confirm user من Supabase"})[error.message] || error.message : start(); };
+}
+async function start(sel) {
+  const {data} = await sb.from("cycles").select("id,cycle_no,start_date,farms(name)").order("start_date", {ascending: false});
+  cycles = data || []; cur = sel || cycles[0]?.id; if (!cycles.length) tab = "setup";
+  app.innerHTML = `<header><h1>🐔 الدهاء للدواجن</h1><select id="cy">${cycles.map(c => `<option value="${c.id}">${c.farms.name} – دورة ${c.cycle_no}</option>`).join("")}</select><button class="ghost" style="color:#fff;border-color:#fff" onclick="sb.auth.signOut().then(loginUI)">خروج</button></header><main id="m"></main>
+  <nav>${[["dash","📊 اللوحة"],["entry","✏️ إدخال يومي"],["rec","📝 علف/صحة/مخزون"],["rep","📄 التقارير"],["setup","⚙️ الدورات"]].map(([t,l]) => `<button data-t="${t}">${l}</button>`).join("")}</nav>`;
+  $("#cy").onchange = e => { cur = e.target.value; load(); };
+  document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+  $("#cy").value = cur || ""; load();
+}
+async function load() {
+  if (!cur) { houses = []; sum = []; return render(); }
+  const [h, s] = await Promise.all([sb.from("houses").select("*").eq("cycle_id", cur).order("no"), sb.from("house_summary").select("*").eq("cycle_id", cur).order("no")]);
+  houses = h.data || []; sum = (s.data || []).map(r => ({...r, fcr: r.weight_kg ? r.feed_kg / ((r.chicks - r.mortality) * r.weight_kg) : null})); render();
+}
+function render() {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t == tab));
+  if (!houses.length && tab != "setup") return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
+  ({dash, entry, rec, rep, setup})[tab]();
+}
+const T = f => sum.reduce((a, r) => a + (+r[f] || 0), 0);
+function bars(vals, labels, unit = "") { // رسم أعمدة SVG بسيط
+  const mx = Math.max(...vals, 1), w = 40;
+  return `<svg viewBox="0 0 ${vals.length * w + 10} 150" width="100%">${vals.map((v, i) => { const h = v / mx * 100; return `<rect x="${i*w+8}" y="${120-h}" width="28" height="${h}" rx="4" fill="var(--pri)"/><text x="${i*w+22}" y="${114-h}" text-anchor="middle">${n(v,1)}${unit}</text><text x="${i*w+22}" y="140" text-anchor="middle">${labels[i]}</text>`; }).join("")}</svg>`;
+}
+async function dash() {
+  const chicks = T("chicks"), mt = T("mortality"), fcr = sum.filter(r => r.fcr).reduce((a, r) => a + r.fcr, 0) / (sum.filter(r => r.fcr).length || 1);
+  const {data: dl} = await sb.from("daily_records").select("rec_date,mortality,houses!inner(cycle_id)").eq("houses.cycle_id", cur).order("rec_date");
+  const byDay = {}; (dl || []).forEach(r => byDay[r.rec_date] = (byDay[r.rec_date] || 0) + r.mortality);
+  const days = Object.keys(byDay).slice(-14);
+  $("#m").innerHTML = `<div class="grid">${[["إجمالي الكتاكيت", n(chicks)], ["النفوق", n(mt)], ["نسبة النفوق %", n(mt / chicks * 100, 2)], ["المباع", n(T("sold"))], ["العلف المستهلك (طن)", n(T("feed_kg") / 1000, 1)], ["متوسط FCR", n(fcr, 3)]].map(([k, v]) => `<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}</div>
+  <h2>نسبة النفوق % لكل عنبر</h2><div class="card">${bars(sum.map(r => +r.mortality_pct), sum.map(r => "H" + r.no))}</div>
+  <h2>FCR لكل عنبر</h2><div class="card">${bars(sum.map(r => r.fcr || 0), sum.map(r => "H" + r.no))}</div>
+  <h2>النفوق اليومي (آخر 14 يوم)</h2><div class="card">${bars(days.map(d => byDay[d]), days.map(d => d.slice(5)))}</div>`;
+}
+async function entry() {
+  const c = cycles.find(x => x.id == cur), today = new Date().toISOString().slice(0, 10);
+  $("#m").innerHTML = `<div class="row"><b>التاريخ:</b><input type="date" id="dt" value="${today}"><button id="sv">💾 حفظ الكل</button><span id="msg"></span></div><div class="hs" id="hs"></div>`;
+  const fill = async () => {
+    const {data} = await sb.from("daily_records").select("*").eq("rec_date", $("#dt").value).in("house_id", houses.map(h => h.id));
+    const m = Object.fromEntries((data || []).map(r => [r.house_id, r]));
+    $("#hs").innerHTML = houses.map(h => { const r = m[h.id] || {}; return `<div class="card" data-h="${h.id}"><b>عنبر ${h.no}</b>
+      <label>النفوق (طائر)</label><input type="number" inputmode="numeric" min="0" data-f="mortality" value="${r.mortality ?? ""}">
+      <label>العلف المستهلك (كجم)</label><input type="number" inputmode="decimal" min="0" data-f="feed_kg" value="${r.feed_kg ?? ""}">
+      <label>متوسط الوزن (جم)</label><input type="number" inputmode="decimal" min="0" data-f="avg_weight_g" value="${r.avg_weight_g ?? ""}">
+      <label>المباع (طائر)</label><input type="number" inputmode="numeric" min="0" data-f="sold" value="${r.sold ?? ""}"></div>`; }).join("");
+  };
+  $("#dt").onchange = fill; await fill();
+  $("#sv").onclick = async () => {
+    const age = Math.round((new Date($("#dt").value) - new Date(c.start_date)) / 864e5), rows = [];
+    document.querySelectorAll("[data-h]").forEach(el => { const o = {house_id: el.dataset.h, rec_date: $("#dt").value, age}; let any = false;
+      el.querySelectorAll("input").forEach(i => { if (i.value !== "") { o[i.dataset.f] = +i.value; any = true; } }); if (any) rows.push(o); });
+    const {error} = await sb.from("daily_records").upsert(rows, {onConflict: "house_id,rec_date"});
+    $("#msg").textContent = error ? "❌ " + error.message : `✅ تم حفظ ${rows.length} عنبر`; if (!error) load.call(null, tab = "entry");
+  };
+}
+function rep() {
+  const hd = ["العنبر", "الكتاكيت", "النفوق", "النفوق %", "الصلاحية %", "المباع", "العلف (كجم)", "الوزن (كجم)", "FCR", "العمر"];
+  const body = sum.map(r => [r.no, n(r.chicks), n(r.mortality), n(r.mortality_pct, 2), n(r.livability_pct, 2), n(r.sold), n(r.feed_kg), n(r.weight_kg, 3), n(r.fcr, 3), r.age]);
+  body.push(["الإجمالي", n(T("chicks")), n(T("mortality")), n(T("mortality") / T("chicks") * 100, 2), n(100 - T("mortality") / T("chicks") * 100, 2), n(T("sold")), n(T("feed_kg")), "", "", ""]);
+  $("#m").innerHTML = `<div class="row"><button id="csv">⬇️ تصدير CSV</button><button class="ghost" onclick="print()">🖨️ طباعة / PDF</button></div><h2>ملخص الدورة (يعادل ورقة Preview)</h2>
+  <div class="card tw"><table><tr>${hd.map(h => `<th>${h}</th>`).join("")}</tr>${body.map(r => `<tr>${r.map((c, i) => `<td class="${i == 3 && parseFloat(c) > 5 ? "bad" : ""}">${c}</td>`).join("")}</tr>`).join("")}</table></div>
+  <h2>السجل اليومي لعنبر</h2><div class="row"><select id="hh">${houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join("")}</select></div><div class="card tw" id="dl"></div>`;
+  $("#csv").onclick = () => { const b = new Blob(["\ufeff" + [hd, ...body].map(r => r.join(",")).join("\n")], {type: "text/csv"}), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "cycle-report.csv"; a.click(); };
+  const daily = async () => { const {data} = await sb.from("daily_records").select("*").eq("house_id", $("#hh").value).order("rec_date"); let cum = 0;
+    $("#dl").innerHTML = `<table><tr><th>التاريخ</th><th>العمر</th><th>النفوق</th><th>التراكمي</th><th>العلف</th><th>الوزن جم</th><th>المباع</th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.age}</td><td>${r.mortality}</td><td>${cum += r.mortality}</td><td>${n(r.feed_kg)}</td><td>${n(r.avg_weight_g)}</td><td>${r.sold}</td></tr>`).join("")}</table>`; };
+  $("#hh").onchange = daily; daily();
+}
+function setup() {
+  $("#m").innerHTML = `<h2>إنشاء دورة جديدة</h2><div class="card hs"><div><label>اسم المزرعة</label><input id="sf" value="Kawakib"></div><div><label>رقم الدورة</label><input id="sc" placeholder="5-26"></div>
+  <div><label>تاريخ استلام الكتاكيت</label><input type="date" id="sd" value="${new Date().toISOString().slice(0, 10)}"></div><div><label>المدير</label><input id="sm"></div>
+  <div><label>عدد العنابر</label><input type="number" id="sn" value="12"></div><div><label>كتاكيت لكل عنبر</label><input type="number" id="sk" value="25000"></div></div>
+  <div class="row" style="margin-top:10px"><button id="mk">➕ إنشاء الدورة</button><span id="ms"></span></div>
+  ${houses.length ? `<h2>أعداد الكتاكيت في العنابر الحالية</h2><div class="hs">${houses.map(h => `<div class="card"><b>عنبر ${h.no}</b><label>عدد الكتاكيت</label><input type="number" data-hid="${h.id}" value="${h.chicks ?? 0}"></div>`).join("")}</div><div class="row" style="margin-top:10px"><button id="sh">💾 حفظ الأعداد</button></div>` : ""}`;
+  $("#mk").onclick = async () => {
+    const name = $("#sf").value.trim(), no = $("#sc").value.trim(), er = m => $("#ms").textContent = "❌ " + m;
+    if (!name || !no || !$("#sd").value) return er("أكمل الحقول المطلوبة");
+    let {data: f} = await sb.from("farms").select("id").eq("name", name).maybeSingle();
+    if (!f) { const r = await sb.from("farms").insert({name}).select("id").single(); if (r.error) return er(r.error.message); f = r.data; }
+    const c = await sb.from("cycles").insert({farm_id: f.id, cycle_no: no, start_date: $("#sd").value, manager: $("#sm").value}).select("id").single();
+    if (c.error) return er(c.error.message);
+    const h = await sb.from("houses").insert(Array.from({length: +$("#sn").value}, (_, i) => ({cycle_id: c.data.id, no: i + 1, chicks: +$("#sk").value})));
+    if (h.error) return er(h.error.message);
+    tab = "entry"; start(c.data.id);
+  };
+  if ($("#sh")) $("#sh").onclick = async () => { for (const i of document.querySelectorAll("[data-hid]")) await sb.from("houses").update({chicks: +i.value}).eq("id", i.dataset.hid); await load(); alert("تم الحفظ"); };
+}
+let sub = "feed";
+const inp = (id, l, t = "text", v = "") => `<div><label>${l}</label><input id="${id}" type="${t}" value="${v}" ${t == "number" ? 'step="any" inputmode="decimal"' : ""}></div>`;
+const sel = (id, l, o) => `<div><label>${l}</label><select id="${id}" style="width:100%">${o}</select></div>`;
+const opts = a => a.map(x => `<option>${x}</option>`).join(""), tdy = () => new Date().toISOString().slice(0, 10);
+async function del(t, id) { if (confirm("حذف السجل؟")) { await sb.from(t).delete().eq("id", id); render(); } }
+async function ins(t, rows) { const {error} = await sb.from(t).insert(rows); if (error) return alert("❌ " + error.message); render(); }
+const trash = (t, id) => `<td><button class="ghost" onclick="del('${t}','${id}')">🗑</button></td>`;
+async function rec() {
+  const tabs = `<div class="row">${[["feed", "🌾 توريد العلف"], ["health", "💊 الصحة والعلاج"], ["stock", "📦 المخزون"]].map(([k, l]) => `<button class="${sub == k ? "" : "ghost"}" onclick="sub='${k}';render()">${l}</button>`).join("")}</div>`;
+  const c = cycles.find(x => x.id == cur), age = d => Math.round((new Date(d) - new Date(c.start_date)) / 864e5), btn = t => `<div class="row" style="margin:10px 0"><button id="ok">${t}</button></div>`;
+  if (sub == "feed") {
+    const {data} = await sb.from("feed_deliveries").select("*").eq("cycle_id", cur).order("rec_date", {ascending: false}).limit(30);
+    $("#m").innerHTML = tabs + `<div class="card hs">${inp("d1", "التاريخ", "date", tdy())}${inp("d2", "المورد")}${sel("d3", "نوع العلف", opts(["بادئ", "نمو", "ناهي"]))}${inp("d4", "الكمية (كجم)", "number")}${inp("d5", "عدد التانكات", "number")}</div>${btn("💾 حفظ التوريدة")}
+    <div class="card tw"><table><tr><th>التاريخ</th><th>المورد</th><th>النوع</th><th>الكمية</th><th>تانكات</th><th></th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.supplier || ""}</td><td>${r.feed_type || ""}</td><td>${n(r.qty_kg)}</td><td>${r.tanks ?? ""}</td>${trash("feed_deliveries", r.id)}</tr>`).join("")}</table></div>`;
+    $("#ok").onclick = () => ins("feed_deliveries", {cycle_id: cur, rec_date: $("#d1").value, supplier: $("#d2").value, feed_type: $("#d3").value, qty_kg: +$("#d4").value, tanks: +$("#d5").value || null});
+  } else if (sub == "health") {
+    const [{data}, {data: it}] = await Promise.all([sb.from("health_records").select("*,houses!inner(no,cycle_id)").eq("houses.cycle_id", cur).order("rec_date", {ascending: false}).limit(40), sb.from("stock_items").select("name,unit").order("name")]);
+    $("#m").innerHTML = tabs + `<div class="card hs">${inp("d1", "التاريخ", "date", tdy())}${sel("d2", "العنبر", `<option value="all">كل العنابر</option>` + houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join(""))}
+    <div><label>الصنف (دواء / لقاح / مكمل)</label><input id="d3" list="il"><datalist id="il">${(it || []).map(i => `<option value="${i.name}">`).join("")}</datalist></div>${sel("d4", "الحالة", opts(["Normal", "Treatment"]))}${inp("d5", "الكمية لكل عنبر", "number")}${inp("d6", "الوحدة")}${inp("d7", "ملاحظة")}</div>${btn("💾 حفظ السجل")}
+    <div class="card tw"><table><tr><th>التاريخ</th><th>عنبر</th><th>الصنف</th><th>الكمية</th><th>الحالة</th><th></th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.houses.no}</td><td>${r.item}</td><td>${n(r.qty, 2)} ${r.unit || ""}</td><td>${r.case_type || ""}</td>${trash("health_records", r.id)}</tr>`).join("")}</table></div>`;
+    $("#d3").onchange = e => { const f = (it || []).find(i => i.name == e.target.value); if (f) $("#d6").value = f.unit || ""; };
+    $("#ok").onclick = () => $("#d3").value && +$("#d5").value ? ins("health_records", ($("#d2").value == "all" ? houses.map(h => h.id) : [$("#d2").value]).map(h => ({house_id: h, rec_date: $("#d1").value, age: age($("#d1").value), case_type: $("#d4").value, item: $("#d3").value, unit: $("#d6").value, qty: +$("#d5").value, note: $("#d7").value}))) : alert("أدخل الصنف والكمية");
+  } else {
+    const [{data: it}, {data: mv}] = await Promise.all([sb.from("stock_items").select("*").order("name"), sb.from("stock_moves").select("*,stock_items(name)").order("move_date", {ascending: false}).limit(15)]);
+    $("#m").innerHTML = tabs + `<h2>حركة مخزون (وارد / صادر)</h2><div class="card hs">${sel("m1", "الصنف", (it || []).map(i => `<option value="${i.id}">${i.name} (${i.unit || ""})</option>`).join(""))}${sel("m2", "النوع", `<option value="in">وارد</option><option value="out">صادر</option>`)}${inp("m3", "الكمية", "number")}${inp("m4", "التاريخ", "date", tdy())}${inp("m5", "رقم الفاتورة / المرجع")}</div>
+    <div class="row" style="margin:10px 0"><button id="mv">💾 تسجيل الحركة</button></div>
+    <h2>إضافة صنف جديد</h2><div class="card hs">${inp("i1", "اسم الصنف")}${inp("i2", "الوحدة")}${sel("i3", "التصنيف", opts(["Normal", "Treatment"]))}${inp("i4", "الحد الأدنى للتنبيه", "number")}</div><div class="row" style="margin:10px 0"><button id="ni">➕ إضافة الصنف</button></div>
+    <h2>الأرصدة</h2><div class="card tw" style="max-height:50vh;overflow:auto"><table><tr><th>الصنف</th><th>الوحدة</th><th>الرصيد</th><th>الحد الأدنى</th></tr>${(it || []).map(i => `<tr><td>${i.name}</td><td>${i.unit || ""}</td><td class="${i.min_level > 0 && i.balance < i.min_level ? "bad" : ""}">${n(i.balance, 2)}</td><td>${n(i.min_level, 2)}</td></tr>`).join("")}</table></div>
+    <h2>آخر الحركات</h2><div class="card tw"><table><tr><th>التاريخ</th><th>الصنف</th><th>النوع</th><th>الكمية</th><th>المرجع</th></tr>${(mv || []).map(r => `<tr><td>${r.move_date}</td><td>${r.stock_items.name}</td><td>${r.kind == "in" ? "وارد" : "صادر"}</td><td>${n(r.qty, 2)}</td><td>${r.ref || ""}</td></tr>`).join("")}</table></div>`;
+    $("#mv").onclick = () => +$("#m3").value > 0 ? ins("stock_moves", {item_id: $("#m1").value, kind: $("#m2").value, qty: +$("#m3").value, move_date: $("#m4").value, ref: $("#m5").value}) : alert("أدخل الكمية");
+    $("#ni").onclick = () => $("#i1").value.trim() ? ins("stock_items", {name: $("#i1").value.trim(), unit: $("#i2").value, category: $("#i3").value, min_level: +$("#i4").value || 0}) : alert("أدخل اسم الصنف");
+  }
+}
+</script>
+</body>
+</html>
