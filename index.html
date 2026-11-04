@@ -5,44 +5,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>الدهاء للدواجن – إدارة الدورات</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--tx:#1b2430;--mut:#6b7785;--pri:#1f7a4d;--bd:#dde3ea;--bad:#c0392b}
 @media(prefers-color-scheme:dark){:root{--bg:#12171c;--card:#1b232b;--tx:#e8edf2;--mut:#9aa7b4;--pri:#3cb87a;--bd:#2c3742;--bad:#ef6a5b}}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--tx);padding-bottom:70px}
-header{background:var(--pri);color:#fff;padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--tx);padding-bottom:24px}
+header{background:var(--pri);color:#fff;padding:0 16px;height:56px;display:flex;gap:10px;align-items:center;position:sticky;top:0;z-index:5}
+header h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}header select{max-width:46vw}
 header h1{font-size:18px;margin:0;flex:1}select,input,button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px}
 button{cursor:pointer;background:var(--pri);color:#fff;border:0;font-weight:600}button.ghost{background:transparent;color:var(--pri);border:1px solid var(--pri)}
-main{max-width:1100px;margin:auto;padding:14px}.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+main{max-width:1250px;padding:16px;margin-inline-start:210px}.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}.k{color:var(--mut);font-size:13px}.v{font-size:24px;font-weight:700;margin-top:4px}
-nav{position:fixed;bottom:0;inset-inline:0;background:var(--card);border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
-nav button{flex:1;background:none;color:var(--mut);border-radius:0;padding:14px 4px}nav button.on{color:var(--pri);border-top:3px solid var(--pri)}
+nav{position:fixed;top:56px;bottom:0;inset-inline-start:0;width:210px;background:var(--card);border-inline-end:1px solid var(--bd);display:flex;flex-direction:column;padding:8px 0;overflow-y:auto;z-index:4}
+nav button{display:flex;align-items:center;gap:12px;background:none;color:var(--mut);border-radius:0;padding:14px 18px;text-align:start;border-inline-start:3px solid transparent}nav button b{font-size:18px}
+nav button.on{color:var(--pri);background:var(--bg);border-inline-start-color:var(--pri)}
+@media(max-width:700px){nav{width:54px}nav button{justify-content:center;padding:14px 0}nav button span{display:none}main{margin-inline-start:54px!important;padding:10px!important}}
+.c2{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}svg{display:block;direction:ltr}.hs select,.hs textarea{width:100%}textarea{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px;resize:vertical}.vhd{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:8px}.pr{display:none}
 .hs{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.hs label{display:block;font-size:12px;color:var(--mut);margin-top:6px}.hs input{width:100%}
 .tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:640px}th,td{padding:8px;border-bottom:1px solid var(--bd);text-align:center;white-space:nowrap}th{background:var(--bg);position:sticky;top:0}
 .bad{color:var(--bad);font-weight:700}h2{margin:18px 0 10px;font-size:17px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
-#login{max-width:340px;margin:12vh auto;display:grid;gap:10px}svg text{fill:var(--mut);font-size:10px}@media print{nav,header,.row{display:none}}
+#login{max-width:340px;margin:12vh auto;display:grid;gap:10px}svg text{fill:var(--mut);font-size:11px}@media print{nav,header,.row,.np{display:none!important}main{margin:0!important}.pr{display:block!important}.vc{break-inside:avoid}:root{--bg:#fff;--card:#fff;--tx:#000;--bd:#ccc;--mut:#444}}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
 // ===== إعداد Supabase: ضع القيم هنا (Project Settings → API) =====
-const SUPABASE_URL = "https://uewwceuwjhxccujbdegx.supabase.co", SUPABASE_KEY = "sb_publishable_kEeGEBFCSMT25qfiy15x0g_TLInju2K";
+const SUPABASE_URL = "", SUPABASE_KEY = "";
 const cfg = { u: SUPABASE_URL || localStorage.sbu || "", k: SUPABASE_KEY || localStorage.sbk || "" };
 const $ = s => document.querySelector(s), app = $("#app"), n = (x, d = 0) => x == null ? "–" : (+x).toLocaleString("en", {maximumFractionDigits: d});
 let sb, cycles = [], cur, houses = [], sum = [], tab = "dash";
 
-if (!cfg.u) { app.innerHTML = `<div id="login" class="card"><h3>ربط Supabase</h3><input id="u" placeholder="Project URL"><input id="k" placeholder="anon public key"><button onclick="localStorage.sbu=u.value.trim();localStorage.sbk=k.value.trim();location.reload()">حفظ</button></div>`; }
+
+const LANG = localStorage.lang || "ar", EN = LANG == "en";
+const nz = x => x.replace(/\uFE0F/g, "").trim();
+const D = {"🐔 الدهاء للدواجن":"🐔 ADDOHA Poultry","خروج":"Logout","تسجيل الدخول":"Sign in","البريد الإلكتروني":"Email","كلمة المرور":"Password","دخول":"Sign in","ربط Supabase":"Connect Supabase","حفظ":"Save",
+"البريد غير مسجل أو كلمة المرور خاطئة":"Unknown email or wrong password","الحساب غير مؤكد: فعّل Confirm user من Supabase":"Account not confirmed: use Confirm user in Supabase",
+"اللوحة":"Dashboard","إدخال يومي":"Daily entry","علف/صحة/مخزون":"Feed / Health / Stock","التقارير":"Reports","الدورات":"Cycles",
+"إجمالي الكتاكيت":"Total chicks","النفوق":"Mortality","نسبة النفوق %":"Mortality %","المباع":"Sold","العلف المستهلك (طن)":"Feed consumed (t)","متوسط FCR":"Average FCR",
+"نسبة النفوق % لكل عنبر":"Mortality % by house","FCR لكل عنبر":"FCR by house","النفوق اليومي":"Daily mortality","استهلاك العلف اليومي (طن)":"Daily feed (t)",
+"التاريخ:":"Date:","💾 حفظ الكل":"💾 Save all","النفوق (طائر)":"Mortality (birds)","العلف المستهلك (كجم)":"Feed consumed (kg)","متوسط الوزن (جم)":"Avg weight (g)","المباع (طائر)":"Sold (birds)",
+"العنبر":"House","عنبر":"House","الكتاكيت":"Chicks","النفوق %":"Mortality %","الصلاحية %":"Livability %","العلف (كجم)":"Feed (kg)","الوزن (كجم)":"Weight (kg)","العمر":"Age","الإجمالي":"Total",
+"⬇️ تصدير CSV":"⬇️ Export CSV","🖨️ طباعة / PDF":"🖨️ Print / PDF","ملخص الدورة (يعادل ورقة Preview)":"Cycle summary","السجل اليومي لعنبر":"Daily log by house","التاريخ":"Date","التراكمي":"Cumulative","العلف":"Feed","الوزن جم":"Weight (g)",
+"🌾 توريد العلف":"🌾 Feed deliveries","💊 الصحة والعلاج":"💊 Health & treatment","📦 المخزون":"📦 Stock","المورد":"Supplier","نوع العلف":"Feed type","بادئ":"Starter","نمو":"Grower","ناهي":"Finisher",
+"الكمية (كجم)":"Quantity (kg)","عدد التانكات":"Tanks","💾 حفظ التوريدة":"💾 Save delivery","النوع":"Type","الكمية":"Quantity","تانكات":"Tanks",
+"كل العنابر":"All houses","الصنف (دواء / لقاح / مكمل)":"Item (drug / vaccine / supplement)","الحالة":"Status","الكمية لكل عنبر":"Quantity per house","الوحدة":"Unit","ملاحظة":"Note","💾 حفظ السجل":"💾 Save record","الصنف":"Item","أدخل الصنف والكمية":"Enter item and quantity","حذف السجل؟":"Delete this record?",
+"حركة مخزون (وارد / صادر)":"Stock movement (in / out)","وارد":"In","صادر":"Out","رقم الفاتورة / المرجع":"Invoice / reference","💾 تسجيل الحركة":"💾 Record movement","إضافة صنف جديد":"Add new item","اسم الصنف":"Item name","التصنيف":"Category","الحد الأدنى للتنبيه":"Alert threshold",
+"➕ إضافة الصنف":"➕ Add item","الأرصدة":"Balances","الرصيد":"Balance","الحد الأدنى":"Minimum","آخر الحركات":"Recent movements","المرجع":"Reference","أدخل الكمية":"Enter quantity","أدخل اسم الصنف":"Enter item name",
+"إنشاء دورة جديدة":"Create new cycle","اسم المزرعة":"Farm name","رقم الدورة":"Cycle number","تاريخ استلام الكتاكيت":"Chick placement date","المدير":"Manager","عدد العنابر":"Number of houses","كتاكيت لكل عنبر":"Chicks per house",
+"➕ إنشاء الدورة":"➕ Create cycle","أعداد الكتاكيت في العنابر الحالية":"Chicks per house (current cycle)","عدد الكتاكيت":"Chick count","💾 حفظ الأعداد":"💾 Save counts","❌ أكمل الحقول المطلوبة":"❌ Fill in the required fields","تم الحفظ":"Saved",
+"الرعاية الصحية":"Veterinary care","➕ زيارة جديدة":"➕ New visit","📋 تقرير الزيارات":"📋 Visit report","اسم الطبيب البيطري":"Veterinarian name","تاريخ الزيارة":"Visit date","المزرعة":"Farm","الدورة":"Cycle",
+"عدد البيوت المسكّنة:":"Houses stocked:","إجمالي الكتاكيت:":"Total chicks:","عمر القطيع (يوم):":"Flock age (days):","لا توجد بيوت مسكّنة في هذه الدورة":"No houses stocked in this cycle","— لم يُفحص":"— Not examined",
+"نوع العرض":"Symptom type","ملاحظات":"Notes","التوصيات":"Recommendations","فحص معملي مطلوب":"Lab test required","💾 حفظ الزيارة":"💾 Save visit","أدخل اسم الطبيب":"Enter the veterinarian name",
+"اختر نوع العرض لعنبر واحد على الأقل":"Select a symptom type for at least one house","✅ تم حفظ الزيارة":"✅ Visit saved",
+"سليم":"Healthy","أعراض تنفسية":"Respiratory signs","أعراض هضمية / إسهال":"Digestive signs / diarrhea","أعراض عصبية":"Nervous signs","مشاكل أرجل / عرج":"Leg problems / lameness","نفوق مرتفع":"High mortality","ضعف نمو":"Poor growth","مشاكل بيئة / تهوية":"Environment / ventilation issues","أخرى":"Other",
+"لا يلزم":"Not required","تشريح":"Post-mortem","زراعة بكتيرية":"Bacterial culture","سيرولوجي":"Serology","فحص نسيجي":"Histopathology","تحليل علف":"Feed analysis","تحليل مياه":"Water analysis","فحص آخر":"Other test",
+"كل المزارع":"All farms","كل الدورات":"All cycles","من تاريخ":"From date","إلى تاريخ":"To date","اسم الطبيب":"Veterinarian","الكل":"All","مطلوب":"Required","غير مطلوب":"Not required","فحص معملي":"Lab test",
+"🔍 عرض":"🔍 Show","📗 تصدير Excel":"📗 Export Excel","📕 تصدير PDF":"📕 Export PDF","زيارة":"visits","سجل عنبر":"house records","لا توجد زيارات مطابقة":"No matching visits","تقرير الزيارات البيطرية":"Veterinary visits report",
+"الطبيب":"Veterinarian","الملاحظات":"Notes","الفحص المعملي":"Lab test","لا توجد بيانات للتصدير":"No data to export","تعذر تحميل مكتبة Excel (تحقق من الإنترنت)":"Could not load the Excel library (check your connection)",
+"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","لا توجد دورة أو عنابر بعد.":"No cycle or houses yet.","⚙️ إنشاء دورة جديدة":"⚙️ Create a new cycle"};
+const DM = Object.fromEntries(Object.entries(D).map(([k, v]) => [nz(k), v]));
+function tr(x) {
+  const c = nz(x); if (!c) return x; let r = DM[c];
+  if (r === undefined) { r = c.replace(/تم حفظ (\d+) عنبر/, "Saved $1 houses").replace(/عنبر\s+(\d+)/g, "House $1").replace(/دورة\s+/g, "Cycle ").replace(/المتوسط/g, "Avg"); if (r === c) return x; }
+  return x.replace(x.trim(), () => r);
+}
+function trAll(root) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let nd;
+  while (nd = w.nextNode()) { const v = tr(nd.nodeValue); if (v !== nd.nodeValue) nd.nodeValue = v; }
+  root.querySelectorAll("[placeholder]").forEach(e => e.placeholder = tr(e.placeholder)); root.querySelectorAll("[title]").forEach(e => e.title = tr(e.title));
+}
+const langBtn = (st = "") => `<button class="ghost" style="${st}" onclick="localStorage.lang='${EN ? "ar" : "en"}';location.reload()">${EN ? "العربية" : "English"}</button>`;
+const _al = window.alert; window.alert = m => _al(EN ? tr(String(m)) : m);
+const _cf = window.confirm; window.confirm = m => _cf(EN ? tr(String(m)) : m);
+if (EN) { document.documentElement.lang = "en"; document.documentElement.dir = "ltr"; document.title = "ADDOHA Poultry – Cycle Management"; new MutationObserver(() => trAll(app)).observe(app, {childList: true, subtree: true, characterData: true}); }
+if (!cfg.u) { app.innerHTML = `<div id="login" class="card">${langBtn("justify-self:end")}<h3>ربط Supabase</h3><input id="u" placeholder="Project URL"><input id="k" placeholder="anon public key"><button onclick="localStorage.sbu=u.value.trim();localStorage.sbk=k.value.trim();location.reload()">حفظ</button></div>`; }
 else { sb = supabase.createClient(cfg.u, cfg.k); sb.auth.getSession().then(({data}) => data.session ? start() : loginUI()); }
 
 function loginUI() {
-  app.innerHTML = `<div id="login" class="card"><h3>تسجيل الدخول</h3><input id="em" type="email" placeholder="البريد الإلكتروني"><input id="pw" type="password" placeholder="كلمة المرور"><button id="go">دخول</button><small id="er" class="bad"></small></div>`;
+  app.innerHTML = `<div id="login" class="card">${langBtn("justify-self:end")}<h3>تسجيل الدخول</h3><input id="em" type="email" placeholder="البريد الإلكتروني"><input id="pw" type="password" placeholder="كلمة المرور"><button id="go">دخول</button><small id="er" class="bad"></small></div>`;
   $("#go").onclick = async () => { const {error} = await sb.auth.signInWithPassword({email: $("#em").value, password: $("#pw").value}); error ? $("#er").textContent = ({"Invalid login credentials": "البريد غير مسجل أو كلمة المرور خاطئة", "Email not confirmed": "الحساب غير مؤكد: فعّل Confirm user من Supabase"})[error.message] || error.message : start(); };
 }
 async function start(sel) {
   const {data} = await sb.from("cycles").select("id,cycle_no,start_date,farms(name)").order("start_date", {ascending: false});
   cycles = data || []; cur = sel || cycles[0]?.id; if (!cycles.length) tab = "setup";
-  app.innerHTML = `<header><h1>🐔 الدهاء للدواجن</h1><select id="cy">${cycles.map(c => `<option value="${c.id}">${c.farms.name} – دورة ${c.cycle_no}</option>`).join("")}</select><button class="ghost" style="color:#fff;border-color:#fff" onclick="sb.auth.signOut().then(loginUI)">خروج</button></header><main id="m"></main>
-  <nav>${[["dash","📊 اللوحة"],["entry","✏️ إدخال يومي"],["rec","📝 علف/صحة/مخزون"],["rep","📄 التقارير"],["setup","⚙️ الدورات"]].map(([t,l]) => `<button data-t="${t}">${l}</button>`).join("")}</nav>`;
+  app.innerHTML = `<header><h1>🐔 الدهاء للدواجن</h1><select id="cy">${cycles.map(c => `<option value="${c.id}">${c.farms.name} – دورة ${c.cycle_no}</option>`).join("")}</select>${langBtn("color:#fff;border-color:#fff")}<button class="ghost" style="color:#fff;border-color:#fff" onclick="sb.auth.signOut().then(loginUI)">خروج</button></header><main id="m"></main>
+  <nav>${[["dash","📊","اللوحة"],["entry","✏️","إدخال يومي"],["rec","📝","علف/صحة/مخزون"],["vet","🩺","الرعاية الصحية"],["rep","📄","التقارير"],["setup","⚙️","الدورات"]].map(([t, i, l]) => `<button data-t="${t}" title="${l}"><b>${i}</b><span>${l}</span></button>`).join("")}</nav>`;
   $("#cy").onchange = e => { cur = e.target.value; load(); };
   document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
   $("#cy").value = cur || ""; load();
@@ -54,23 +102,41 @@ async function load() {
 }
 function render() {
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t == tab));
-  if (!houses.length && tab != "setup") return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
-  ({dash, entry, rec, rep, setup})[tab]();
+  if (!houses.length && !["setup", "vet"].includes(tab)) return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
+  ({dash, entry, rec, vet, rep, setup})[tab]();
 }
 const T = f => sum.reduce((a, r) => a + (+r[f] || 0), 0);
-function bars(vals, labels, unit = "") { // رسم أعمدة SVG بسيط
-  const mx = Math.max(...vals, 1), w = 40;
-  return `<svg viewBox="0 0 ${vals.length * w + 10} 150" width="100%">${vals.map((v, i) => { const h = v / mx * 100; return `<rect x="${i*w+8}" y="${120-h}" width="28" height="${h}" rx="4" fill="var(--pri)"/><text x="${i*w+22}" y="${114-h}" text-anchor="middle">${n(v,1)}${unit}</text><text x="${i*w+22}" y="140" text-anchor="middle">${labels[i]}</text>`; }).join("")}</svg>`;
+const niceMax = m => { const p = 10 ** Math.floor(Math.log10(m)), f = m / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; };
+function chart(vals, labels, o = {}) {
+  if (!vals.length) return `<div class="k">–</div>`;
+  const W = 640, H = 250, L = 46, R = 14, T = 18, B = 34, d = o.dec ?? 0, mx = niceMax(Math.max(...vals, 1e-9)), pw = W - L - R, ph = H - T - B, st = pw / vals.length;
+  const y = v => T + ph - v / mx * ph, x = i => L + st * i + st / 2, every = Math.ceil(vals.length / 14);
+  const grid = [0, .25, .5, .75, 1].map(f => `<line x1="${L}" x2="${W - R}" y1="${y(mx * f)}" y2="${y(mx * f)}" stroke="var(--bd)"/><text x="${L - 6}" y="${y(mx * f) + 4}" text-anchor="end">${n(mx * f, d)}</text>`).join("");
+  let b;
+  if (o.line) {
+    const pts = vals.map((v, i) => `${x(i)},${y(v)}`).join(" ");
+    b = `<polygon points="${x(0)},${y(0)} ${pts} ${x(vals.length - 1)},${y(0)}" fill="var(--pri)" opacity=".13"/><polyline points="${pts}" fill="none" stroke="var(--pri)" stroke-width="2.5" stroke-linejoin="round"/>` +
+      vals.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="${vals.length > 30 ? 2 : 3.5}" fill="var(--pri)"><title>${labels[i]}: ${n(v, d)}</title></circle>`).join("");
+  } else {
+    const bw = Math.min(34, st * .62);
+    b = vals.map((v, i) => `<rect x="${x(i) - bw / 2}" y="${y(v)}" width="${bw}" height="${Math.max(y(0) - y(v), 0)}" rx="4" fill="${o.warn && v > o.warn ? "var(--bad)" : "var(--pri)"}"><title>${labels[i]}: ${n(v, d)}</title></rect><text x="${x(i)}" y="${y(v) - 5}" text-anchor="middle" style="fill:var(--tx)">${n(v, d)}</text>`).join("");
+  }
+  if (o.avg != null) b += `<line x1="${L}" x2="${W - R}" y1="${y(o.avg)}" y2="${y(o.avg)}" stroke="#e08a00" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${W - R}" y="${y(o.avg) - 5}" text-anchor="end" style="fill:#e08a00">المتوسط ${n(o.avg, d)}</text>`;
+  const xl = labels.map((l, i) => i % every ? "" : `<text x="${x(i)}" y="${H - 12}" text-anchor="middle">${l}</text>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">${grid}${b}${xl}</svg>`;
 }
 async function dash() {
-  const chicks = T("chicks"), mt = T("mortality"), fcr = sum.filter(r => r.fcr).reduce((a, r) => a + r.fcr, 0) / (sum.filter(r => r.fcr).length || 1);
-  const {data: dl} = await sb.from("daily_records").select("rec_date,mortality,houses!inner(cycle_id)").eq("houses.cycle_id", cur).order("rec_date");
-  const byDay = {}; (dl || []).forEach(r => byDay[r.rec_date] = (byDay[r.rec_date] || 0) + r.mortality);
-  const days = Object.keys(byDay).slice(-14);
-  $("#m").innerHTML = `<div class="grid">${[["إجمالي الكتاكيت", n(chicks)], ["النفوق", n(mt)], ["نسبة النفوق %", n(mt / chicks * 100, 2)], ["المباع", n(T("sold"))], ["العلف المستهلك (طن)", n(T("feed_kg") / 1000, 1)], ["متوسط FCR", n(fcr, 3)]].map(([k, v]) => `<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}</div>
-  <h2>نسبة النفوق % لكل عنبر</h2><div class="card">${bars(sum.map(r => +r.mortality_pct), sum.map(r => "H" + r.no))}</div>
-  <h2>FCR لكل عنبر</h2><div class="card">${bars(sum.map(r => r.fcr || 0), sum.map(r => "H" + r.no))}</div>
-  <h2>النفوق اليومي (آخر 14 يوم)</h2><div class="card">${bars(days.map(d => byDay[d]), days.map(d => d.slice(5)))}</div>`;
+  const chicks = T("chicks"), mt = T("mortality"), ok = sum.filter(r => r.fcr), fcr = ok.reduce((a, r) => a + r.fcr, 0) / (ok.length || 1), avgM = mt / chicks * 100;
+  const {data: dl} = await sb.from("daily_records").select("rec_date,mortality,feed_kg,houses!inner(cycle_id)").eq("houses.cycle_id", cur).order("rec_date");
+  const by = {}; (dl || []).forEach(r => { const o = by[r.rec_date] ||= {m: 0, f: 0}; o.m += r.mortality || 0; o.f += +r.feed_kg || 0; });
+  const days = Object.keys(by), dlb = days.map(d => d.slice(5)), hl = sum.map(r => "H" + r.no);
+  const kpi = [["🐥", "إجمالي الكتاكيت", n(chicks)], ["⚠️", "النفوق", n(mt)], ["📉", "نسبة النفوق %", n(avgM, 2)], ["🛒", "المباع", n(T("sold"))], ["🌾", "العلف المستهلك (طن)", n(T("feed_kg") / 1000, 1)], ["⚖️", "متوسط FCR", n(fcr, 3)]];
+  const cd = (t, c) => `<div class="card"><div class="k" style="margin-bottom:6px;font-weight:600">${t}</div>${c}</div>`;
+  $("#m").innerHTML = `<div class="grid">${kpi.map(([i, k, v]) => `<div class="card"><div class="k"><span>${i}</span> ${k}</div><div class="v">${v}</div></div>`).join("")}</div><div class="c2" style="margin-top:12px">
+  ${cd("نسبة النفوق % لكل عنبر", chart(sum.map(r => +r.mortality_pct), hl, {dec: 2, warn: 5, avg: avgM}))}
+  ${cd("FCR لكل عنبر", chart(sum.map(r => r.fcr || 0), hl, {dec: 2, avg: fcr}))}
+  ${cd("النفوق اليومي", chart(days.map(d => by[d].m), dlb, {line: 1}))}
+  ${cd("استهلاك العلف اليومي (طن)", chart(days.map(d => by[d].f / 1000), dlb, {line: 1, dec: 1}))}</div>`;
 }
 async function entry() {
   const c = cycles.find(x => x.id == cur), today = new Date().toISOString().slice(0, 10);
@@ -100,7 +166,7 @@ function rep() {
   $("#m").innerHTML = `<div class="row"><button id="csv">⬇️ تصدير CSV</button><button class="ghost" onclick="print()">🖨️ طباعة / PDF</button></div><h2>ملخص الدورة (يعادل ورقة Preview)</h2>
   <div class="card tw"><table><tr>${hd.map(h => `<th>${h}</th>`).join("")}</tr>${body.map(r => `<tr>${r.map((c, i) => `<td class="${i == 3 && parseFloat(c) > 5 ? "bad" : ""}">${c}</td>`).join("")}</tr>`).join("")}</table></div>
   <h2>السجل اليومي لعنبر</h2><div class="row"><select id="hh">${houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join("")}</select></div><div class="card tw" id="dl"></div>`;
-  $("#csv").onclick = () => { const b = new Blob(["\ufeff" + [hd, ...body].map(r => r.join(",")).join("\n")], {type: "text/csv"}), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "cycle-report.csv"; a.click(); };
+  $("#csv").onclick = () => { const b = new Blob(["\ufeff" + [hd, ...body].map(r => r.map(c => '"' + (EN ? tr(String(c)) : c) + '"').join(",")).join("\n")], {type: "text/csv"}), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "cycle-report.csv"; a.click(); };
   const daily = async () => { const {data} = await sb.from("daily_records").select("*").eq("house_id", $("#hh").value).order("rec_date"); let cum = 0;
     $("#dl").innerHTML = `<table><tr><th>التاريخ</th><th>العمر</th><th>النفوق</th><th>التراكمي</th><th>العلف</th><th>الوزن جم</th><th>المباع</th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.age}</td><td>${r.mortality}</td><td>${cum += r.mortality}</td><td>${n(r.feed_kg)}</td><td>${n(r.avg_weight_g)}</td><td>${r.sold}</td></tr>`).join("")}</table>`; };
   $("#hh").onchange = daily; daily();
@@ -127,7 +193,7 @@ function setup() {
 let sub = "feed";
 const inp = (id, l, t = "text", v = "") => `<div><label>${l}</label><input id="${id}" type="${t}" value="${v}" ${t == "number" ? 'step="any" inputmode="decimal"' : ""}></div>`;
 const sel = (id, l, o) => `<div><label>${l}</label><select id="${id}" style="width:100%">${o}</select></div>`;
-const opts = a => a.map(x => `<option>${x}</option>`).join(""), tdy = () => new Date().toISOString().slice(0, 10);
+const opts = a => a.map(x => `<option value="${x}">${x}</option>`).join(""), tdy = () => new Date().toISOString().slice(0, 10);
 async function del(t, id) { if (confirm("حذف السجل؟")) { await sb.from(t).delete().eq("id", id); render(); } }
 async function ins(t, rows) { const {error} = await sb.from(t).insert(rows); if (error) return alert("❌ " + error.message); render(); }
 const trash = (t, id) => `<td><button class="ghost" onclick="del('${t}','${id}')">🗑</button></td>`;
@@ -155,6 +221,72 @@ async function rec() {
     <h2>آخر الحركات</h2><div class="card tw"><table><tr><th>التاريخ</th><th>الصنف</th><th>النوع</th><th>الكمية</th><th>المرجع</th></tr>${(mv || []).map(r => `<tr><td>${r.move_date}</td><td>${r.stock_items.name}</td><td>${r.kind == "in" ? "وارد" : "صادر"}</td><td>${n(r.qty, 2)}</td><td>${r.ref || ""}</td></tr>`).join("")}</table></div>`;
     $("#mv").onclick = () => +$("#m3").value > 0 ? ins("stock_moves", {item_id: $("#m1").value, kind: $("#m2").value, qty: +$("#m3").value, move_date: $("#m4").value, ref: $("#m5").value}) : alert("أدخل الكمية");
     $("#ni").onclick = () => $("#i1").value.trim() ? ins("stock_items", {name: $("#i1").value.trim(), unit: $("#i2").value, category: $("#i3").value, min_level: +$("#i4").value || 0}) : alert("أدخل اسم الصنف");
+  }
+}
+
+const SYM = [["normal", "سليم"], ["respiratory", "أعراض تنفسية"], ["digestive", "أعراض هضمية / إسهال"], ["nervous", "أعراض عصبية"], ["leg", "مشاكل أرجل / عرج"], ["mortality", "نفوق مرتفع"], ["growth", "ضعف نمو"], ["environment", "مشاكل بيئة / تهوية"], ["other", "أخرى"]];
+const LAB = [["", "لا يلزم"], ["necropsy", "تشريح"], ["bacteriology", "زراعة بكتيرية"], ["pcr", "PCR"], ["serology", "سيرولوجي"], ["histo", "فحص نسيجي"], ["feed", "تحليل علف"], ["water", "تحليل مياه"], ["other_lab", "فحص آخر"]];
+const lbl = (l, c) => (l.find(x => x[0] == c) || [0, c || ""])[1], L_ = x => EN ? tr(String(x)) : x, po = l => l.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
+const esc = x => String(x ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+let vsub = "new", vrows = [];
+async function vet() {
+  const tabs = `<div class="row np">${[["new", "➕ زيارة جديدة"], ["list", "📋 تقرير الزيارات"]].map(([k, l]) => `<button class="${vsub == k ? "" : "ghost"}" onclick="vsub='${k}';render()">${l}</button>`).join("")}</div>`;
+  const [{data: fm}, {data: cy}] = await Promise.all([sb.from("farms").select("id,name").order("name"), sb.from("cycles").select("id,farm_id,cycle_no,start_date").order("start_date", {ascending: false})]);
+  const farms = fm || [], cys = cy || [], fo = farms.map(f => `<option value="${f.id}">${esc(f.name)}</option>`).join(""), fname = id => (farms.find(f => f.id == id) || {}).name || "";
+  const co = fid => cys.filter(c => c.farm_id == fid).map(c => `<option value="${c.id}">دورة ${c.cycle_no}</option>`).join("");
+  if (vsub == "new") {
+    $("#m").innerHTML = tabs + `<div class="card hs">${inp("v1", "اسم الطبيب البيطري", "text", esc(localStorage.vetName || ""))}${inp("v2", "تاريخ الزيارة", "date", tdy())}${sel("v3", "المزرعة", fo)}${sel("v4", "الدورة", "")}</div>
+    <div id="vi" style="margin:10px 0"></div><div class="hs" id="vh"></div><div class="row" style="margin:12px 0"><button id="vs">💾 حفظ الزيارة</button></div>`;
+    const c0 = cys.find(c => c.id == cur); if (c0) $("#v3").value = c0.farm_id; else if (farms[0]) $("#v3").value = farms[0].id;
+    const fc = () => { $("#v4").innerHTML = co($("#v3").value); if (c0 && c0.farm_id == $("#v3").value) $("#v4").value = c0.id; return lh(); };
+    const lh = async () => {
+      const c = cys.find(x => x.id == $("#v4").value); if (!c) { $("#vi").innerHTML = ""; $("#vh").innerHTML = ""; return; }
+      const {data: hs} = await sb.from("houses").select("id,no,chicks").eq("cycle_id", c.id).gt("chicks", 0).order("no"), H = hs || [];
+      const tot = H.reduce((a, h) => a + (h.chicks || 0), 0), ag = Math.round((new Date($("#v2").value) - new Date(c.start_date)) / 864e5);
+      $("#vi").innerHTML = H.length ? `<div class="card"><span>عدد البيوت المسكّنة:</span> <b>${H.length}</b> &nbsp;·&nbsp; <span>إجمالي الكتاكيت:</span> <b>${n(tot)}</b> &nbsp;·&nbsp; <span>عمر القطيع (يوم):</span> <b>${ag}</b></div>` : `<div class="card bad">لا توجد بيوت مسكّنة في هذه الدورة</div>`;
+      $("#vh").innerHTML = H.map(h => `<div class="card" data-v="${h.id}"><b>عنبر ${h.no}</b> <span class="k">(${n(h.chicks)})</span>
+        <label>نوع العرض</label><select data-f="symptom"><option value="">— لم يُفحص</option>${po(SYM)}</select>
+        <label>ملاحظات</label><textarea data-f="notes" rows="2"></textarea><label>التوصيات</label><textarea data-f="recommendations" rows="2"></textarea>
+        <label>فحص معملي مطلوب</label><select data-f="lab_test">${po(LAB)}</select></div>`).join("");
+    };
+    $("#v3").onchange = fc; $("#v4").onchange = lh; $("#v2").onchange = lh; await fc();
+    $("#vs").onclick = async () => {
+      const name = $("#v1").value.trim(); if (!name) return alert("أدخل اسم الطبيب"); const rows = [];
+      document.querySelectorAll("[data-v]").forEach(el => { const o = {house_id: el.dataset.v}; el.querySelectorAll("[data-f]").forEach(i => o[i.dataset.f] = i.value.trim() || null); if (o.symptom) rows.push(o); });
+      if (!rows.length) return alert("اختر نوع العرض لعنبر واحد على الأقل"); localStorage.vetName = name;
+      const {data: v, error} = await sb.from("vet_visits").insert({farm_id: $("#v3").value, cycle_id: $("#v4").value, visit_date: $("#v2").value, vet_name: name}).select("id").single();
+      if (error) return alert("❌ " + error.message);
+      const r = await sb.from("vet_visit_houses").insert(rows.map(o => ({...o, visit_id: v.id})));
+      if (r.error) { await sb.from("vet_visits").delete().eq("id", v.id); return alert("❌ " + r.error.message); }
+      alert("✅ تم حفظ الزيارة"); vsub = "list"; render();
+    };
+  } else {
+    $("#m").innerHTML = tabs + `<div class="card hs np">${sel("f1", "المزرعة", `<option value="">كل المزارع</option>` + fo)}${sel("f2", "الدورة", `<option value="">كل الدورات</option>` + cys.map(c => `<option value="${c.id}">${esc(fname(c.farm_id))} – دورة ${c.cycle_no}</option>`).join(""))}${inp("f3", "من تاريخ", "date")}${inp("f4", "إلى تاريخ", "date")}${inp("f5", "اسم الطبيب")}
+      ${sel("f6", "نوع العرض", `<option value="">الكل</option>` + po(SYM))}${sel("f7", "فحص معملي", `<option value="">الكل</option><option value="yes">مطلوب</option><option value="no">غير مطلوب</option>`)}</div>
+    <div class="row np" style="margin:10px 0"><button id="fa">🔍 عرض</button><button id="fx">📗 تصدير Excel</button><button id="fp" title="في نافذة الطباعة اختر «حفظ بصيغة PDF»">📕 تصدير PDF</button><span id="fc" class="k"></span></div>
+    <div class="pr"><h2>تقرير الزيارات البيطرية</h2><div><span>تاريخ الطباعة:</span> ${tdy()}</div></div><div id="vr"></div>`;
+    const run = async () => {
+      let q = sb.from("vet_visits").select("id,visit_date,vet_name,farm_id,farms(name),cycles(cycle_no),vet_visit_houses(symptom,notes,recommendations,lab_test,houses(no))").order("visit_date", {ascending: false}).limit(300);
+      if ($("#f1").value) q = q.eq("farm_id", $("#f1").value); if ($("#f2").value) q = q.eq("cycle_id", $("#f2").value);
+      if ($("#f3").value) q = q.gte("visit_date", $("#f3").value); if ($("#f4").value) q = q.lte("visit_date", $("#f4").value); if ($("#f5").value.trim()) q = q.ilike("vet_name", "%" + $("#f5").value.trim() + "%");
+      const {data, error} = await q; if (error) return $("#vr").innerHTML = `<div class="card bad">${esc(error.message)}</div>`;
+      const sy = $("#f6").value, lb = $("#f7").value;
+      const vis = (data || []).map(v => ({...v, hs: (v.vet_visit_houses || []).filter(h => (!sy || h.symptom == sy) && (!lb || (lb == "yes" ? !!h.lab_test : !h.lab_test))).sort((a, b) => a.houses.no - b.houses.no)})).filter(v => v.hs.length);
+      vrows = vis.flatMap(v => v.hs.map(h => ({date: v.visit_date, vet: v.vet_name, farm: (v.farms || {}).name || "", cycle: (v.cycles || {}).cycle_no || "", house: h.houses.no, sym: h.symptom, notes: h.notes || "", rec: h.recommendations || "", lab: h.lab_test || ""})));
+      $("#fc").innerHTML = `<b>${vis.length}</b> <span>زيارة</span> · <b>${vrows.length}</b> <span>سجل عنبر</span>`;
+      $("#vr").innerHTML = vis.length ? vis.map(v => `<div class="card vc" style="margin-bottom:12px"><div class="vhd"><b>${v.visit_date}</b><span>🩺 ${esc(v.vet_name)}</span><span>${esc((v.farms || {}).name)} – دورة ${(v.cycles || {}).cycle_no || ""}</span><button class="ghost np" onclick="del('vet_visits','${v.id}')">🗑</button></div>
+        <div class="tw"><table><tr><th>العنبر</th><th>نوع العرض</th><th>ملاحظات</th><th>التوصيات</th><th>فحص معملي</th></tr>${v.hs.map(h => `<tr><td>${h.houses.no}</td><td>${lbl(SYM, h.symptom)}</td><td style="white-space:normal;text-align:start">${esc(h.notes)}</td><td style="white-space:normal;text-align:start">${esc(h.recommendations)}</td><td class="${h.lab_test ? "bad" : ""}">${h.lab_test ? lbl(LAB, h.lab_test) : "–"}</td></tr>`).join("")}</table></div></div>`).join("") : `<div class="card">لا توجد زيارات مطابقة</div>`;
+    };
+    ["f1", "f2", "f3", "f4", "f5", "f6", "f7"].forEach(i => $("#" + i).onchange = run); $("#fa").onclick = run;
+    $("#fp").onclick = () => print();
+    $("#fx").onclick = () => {
+      if (!vrows.length) return alert("لا توجد بيانات للتصدير"); if (!window.XLSX) return alert("تعذر تحميل مكتبة Excel (تحقق من الإنترنت)");
+      const hd = ["التاريخ", "الطبيب", "المزرعة", "الدورة", "العنبر", "نوع العرض", "الملاحظات", "التوصيات", "الفحص المعملي"].map(L_);
+      const ws = XLSX.utils.aoa_to_sheet([hd, ...vrows.map(r => [r.date, r.vet, r.farm, r.cycle, r.house, L_(lbl(SYM, r.sym)), r.notes, r.rec, r.lab ? L_(lbl(LAB, r.lab)) : ""])]);
+      ws["!cols"] = [12, 18, 14, 10, 8, 24, 40, 40, 18].map(w => ({wch: w})); const wb = XLSX.utils.book_new(); if (!EN) wb.Workbook = {Views: [{RTL: true}]};
+      XLSX.utils.book_append_sheet(wb, ws, "Vet visits"); XLSX.writeFile(wb, "vet-visits-" + tdy() + ".xlsx");
+    };
+    run();
   }
 }
 </script>
