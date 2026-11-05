@@ -69,7 +69,13 @@ const D = {"🐔 شركة دواجن الدوحة":"🐔 Addoha Poultry Company"
 "كل المزارع":"All farms","كل الدورات":"All cycles","من تاريخ":"From date","إلى تاريخ":"To date","اسم الطبيب":"Veterinarian","الكل":"All","مطلوب":"Required","غير مطلوب":"Not required","فحص معملي":"Lab test",
 "🔍 عرض":"🔍 Show","📗 تصدير Excel":"📗 Export Excel","📕 تصدير PDF":"📕 Export PDF","زيارة":"visits","سجل عنبر":"house records","لا توجد زيارات مطابقة":"No matching visits","تقرير الزيارات البيطرية":"Veterinary visits report",
 "الطبيب":"Veterinarian","الملاحظات":"Notes","الفحص المعملي":"Lab test","لا توجد بيانات للتصدير":"No data to export","تعذر تحميل مكتبة Excel (تحقق من الإنترنت)":"Could not load the Excel library (check your connection)",
-"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","العمر:":"Age:","تاريخ التسكين":"Placement date","تاريخ التسكين (افتراضي)":"Placement date (default)","كتاكيت لكل عنبر (افتراضي)":"Chicks per house (default)","عدّل تاريخ التسكين والمصدر لكل عنبر عند الحاجة":"Adjust the placement date and source per house if needed",
+"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","الصيانة":"Maintenance","📊 لوحة الصيانة":"📊 Maintenance dashboard","🔧 طلبات الصيانة":"🔧 Maintenance requests","📋 تقرير الصيانة":"📋 Maintenance report","تقرير الصيانة":"Maintenance report","➕ طلب صيانة جديد":"➕ New maintenance request","✏️ تعديل الطلب":"✏️ Edit request",
+"طارئ":"Emergency","غير طارئ":"Non-emergency","مفتوح":"Open","جاري العمل عليه":"In progress","تم الحل":"Resolved",
+"خطوط العلف":"Feed lines","خطوط المياه":"Water lines","الكهرباء":"Electricity","السكن":"Housing / accommodation","التهوية والمراوح":"Ventilation & fans","التدفئة والغاز":"Heating & gas","التبريد (وسادات / رشاشات)":"Cooling (pads / sprinklers)","المولدات والطاقة الاحتياطية":"Generators & backup power","المباني والأسقف والأبواب":"Buildings, roofs & doors","أجهزة التحكم والحساسات":"Controllers & sensors","المركبات والمعدات":"Vehicles & equipment",
+"الأولوية":"Priority","نوع المشكلة":"Problem type","تاريخ الطلب":"Request date","مقدم الطلب":"Requested by","المسؤول عن التنفيذ":"Assigned to","وصف المشكلة":"Problem description","ملاحظات الحل":"Resolution notes","— بدون دورة":"— No cycle","عام (كل المزرعة)":"General (whole farm)","💾 حفظ الطلب":"💾 Save request",
+"مقدم الطلب:":"Requested by:","المسؤول عن التنفيذ:":"Assigned to:","ملاحظات الحل:":"Resolution notes:","تاريخ الحل:":"Resolved on:",
+"متوسط زمن الحل (يوم)":"Avg resolution time (days)","طارئ غير محلول":"Unresolved emergencies","إجمالي الطلبات":"Total requests","غير المحلولة حسب النوع":"Unresolved by type","غير المحلولة حسب المزرعة":"Unresolved by farm","الطلبات الطارئة المفتوحة":"Open emergency requests","لا توجد طلبات":"No requests","أيام مفتوح":"Days open",
+"رقم الطلب":"Request no.","المسؤول":"Assigned to","تاريخ الحل":"Resolved on","الوصف":"Description","طلب":"requests","كل الأولويات":"All priorities","كل الأنواع":"All types","لا توجد طلبات مطابقة":"No matching requests","العمر:":"Age:","تاريخ التسكين":"Placement date","تاريخ التسكين (افتراضي)":"Placement date (default)","كتاكيت لكل عنبر (افتراضي)":"Chicks per house (default)","عدّل تاريخ التسكين والمصدر لكل عنبر عند الحاجة":"Adjust the placement date and source per house if needed",
 "⚠️ أكمل الحقول المطلوبة":"⚠️ Fill in the required fields","⚠️ أدخل تاريخ التسكين لكل عنبر":"⚠️ Enter a placement date for each house","⚠️ لا توجد بيانات جديدة للحفظ":"⚠️ No new data to save","✏️ تعديل":"✏️ Edit","🗑 حذف":"🗑 Delete","✅ تم حفظ التعديل":"✅ Changes saved","🗑 تم الحذف":"🗑 Deleted",
 "⚠️ هذا السجل مسجل مسبقاً":"⚠️ This record already exists","⚠️ هذه الزيارة مسجلة مسبقاً":"⚠️ This visit is already recorded","✏️ عدّل القيم ثم اضغط حفظ الكل":"✏️ Edit the values, then press Save all","💾 حفظ التعديل":"💾 Save changes","إلغاء":"Cancel",
 "⚠️ أدخل الكمية":"⚠️ Enter the quantity","⚠️ أدخل اسم الصنف":"⚠️ Enter the item name","⚠️ أدخل الصنف والكمية":"⚠️ Enter the item and quantity",
@@ -89,7 +95,7 @@ const D = {"🐔 شركة دواجن الدوحة":"🐔 Addoha Poultry Company"
 const DM = Object.fromEntries(Object.entries(D).map(([k, v]) => [nz(k), v]));
 function tr(x) {
   const c = nz(x); if (!c) return x; let r = DM[c];
-  if (r === undefined) { r = c.replace(/تم حفظ (\d+) عنبر/, "Saved $1 houses").replace(/عنبر\s+(\d+)/g, "House $1").replace(/دورة\s+/g, "Cycle ").replace(/المتوسط/g, "Avg").replace(/التطهير – المرحلة (\d+)/g, "Disinfection – stage $1"); if (r === c) return x; }
+  if (r === undefined) { r = c.replace(/تم حفظ (\d+) عنبر/, "Saved $1 houses").replace(/عنبر\s+(\d+)/g, "House $1").replace(/دورة\s+/g, "Cycle ").replace(/المتوسط/g, "Avg").replace(/تم الحفظ — رقم الطلب/g, "Saved — request no.").replace(/التطهير – المرحلة (\d+)/g, "Disinfection – stage $1"); if (r === c) return x; }
   return x.replace(x.trim(), () => r);
 }
 function trAll(root) {
@@ -113,7 +119,7 @@ async function start(sel) {
   const {data} = await sb.from("cycles").select("id,cycle_no,start_date,farms(name)").order("start_date", {ascending: false});
   await loadFarms(); cycles = data || []; cur = sel || cycles[0]?.id; if (!cycles.length) tab = "setup";
   app.innerHTML = `<header><h1>🐔 شركة دواجن الدوحة</h1><select id="cy">${cycles.map(c => `<option value="${c.id}">${c.farms.name} – دورة ${c.cycle_no}</option>`).join("")}</select>${langBtn("color:#fff;border-color:#fff")}<button class="ghost" style="color:#fff;border-color:#fff" onclick="sb.auth.signOut().then(loginUI)">خروج</button></header><main id="m"></main>
-  <nav>${[["dash","اللوحة"],["farms","حالة المزارع"],["entry","إدخال يومي"],["rec","علف/صحة/مخزون"],["vet","الرعاية الصحية"],["lab","المعمل"],["bio","الأمن الحيوي"],["rep","التقارير"],["setup","الدورات"]].map(([t, l]) => `<button data-t="${t}" title="${l}"><b class="ic"><svg viewBox="0 0 24 24">${ICONS[t]}</svg><i class="bdg" id="bdg-${t}"></i></b><span>${l}</span></button>`).join("")}</nav>`;
+  <nav>${[["dash","اللوحة"],["farms","حالة المزارع"],["entry","إدخال يومي"],["rec","علف/صحة/مخزون"],["vet","الرعاية الصحية"],["lab","المعمل"],["bio","الأمن الحيوي"],["maint","الصيانة"],["rep","التقارير"],["setup","الدورات"]].map(([t, l]) => `<button data-t="${t}" title="${l}"><b class="ic"><svg viewBox="0 0 24 24">${ICONS[t]}</svg><i class="bdg" id="bdg-${t}"></i></b><span>${l}</span></button>`).join("")}</nav>`;
   $("#cy").onchange = e => { cur = e.target.value; load(); };
   document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.t; pf = ""; render(); });
   $("#cy").value = cur || ""; load();
@@ -125,8 +131,8 @@ async function load() {
 }
 function render() {
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t == tab));
-  if (!houses.length && !["setup", "vet", "lab", "farms", "bio"].includes(tab)) return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
-  ({dash, farms, entry, rec, vet, lab, bio, rep, setup})[tab](); updateBadge();
+  if (!houses.length && !["setup", "vet", "lab", "farms", "bio", "maint"].includes(tab)) return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
+  ({dash, farms, entry, rec, vet, lab, bio, maint, rep, setup})[tab](); updateBadge();
 }
 const T = f => sum.reduce((a, r) => a + (+r[f] || 0), 0);
 const niceMax = m => { const p = 10 ** Math.floor(Math.log10(m)), f = m / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; };
@@ -465,7 +471,10 @@ function toast(m, bad) {
   t.textContent = EN ? tr(String(m)) : m; t.className = bad ? "err" : ""; t.style.opacity = 1; clearTimeout(t._h); t._h = setTimeout(() => t.style.opacity = 0, 3200);
 }
 app.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#m button"); if (!b || b.dataset.nolock) return; setTimeout(() => { b.disabled = true; setTimeout(() => b.disabled = false, 1500); }, 0); }, true);
-async function updateBadge() { const {count} = await sb.from("lab_tests").select("id", {count: "exact", head: true}).is("result_date", null), b = document.getElementById("bdg-lab"); if (b) b.textContent = count || ""; }
+async function updateBadge() {
+  const [{count: a}, {count: m}] = await Promise.all([sb.from("lab_tests").select("id", {count: "exact", head: true}).is("result_date", null), sb.from("maint_requests").select("id", {count: "exact", head: true}).eq("priority", "emergency").neq("status", "resolved")]);
+  const x = document.getElementById("bdg-lab"), y = document.getElementById("bdg-maint"); if (x) x.textContent = a || ""; if (y) y.textContent = m || "";
+}
 const ageOf = (h, d, fb) => { const p = h.placement_date || fb || (cycles.find(c => c.id == cur) || {}).start_date; return p ? Math.round((new Date(d) - new Date(p)) / 864e5) : null; };
 const ageTag = (h, d, fb) => { const a = ageOf(h, d, fb); return a != null && a >= 0 ? `<span class="k"><span>العمر:</span> ${a}</span>` : ""; };
 
@@ -549,6 +558,84 @@ async function bio() {
     const r = await sb.from("biosec_stages").insert(BIO_STAGES.map(([k, nm], i) => ({task_id: t.id, seq: i + 1, kind: k, name: nm}))); if (r.error) return toast("❌ " + r.error.message, 1);
     pf = ""; toast("✅ تم الحفظ"); render();
   };
+}
+
+// ===== الصيانة =====
+ICONS.maint = '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>';
+const MPRI = [["emergency", "طارئ"], ["normal", "غير طارئ"]], MST = [["open", "مفتوح"], ["in_progress", "جاري العمل عليه"], ["resolved", "تم الحل"]];
+const MTYPE = [["feed_line", "خطوط العلف"], ["water_line", "خطوط المياه"], ["electricity", "الكهرباء"], ["housing", "السكن"], ["ventilation", "التهوية والمراوح"], ["heating", "التدفئة والغاز"], ["cooling", "التبريد (وسادات / رشاشات)"], ["generator", "المولدات والطاقة الاحتياطية"], ["structure", "المباني والأسقف والأبواب"], ["controllers", "أجهزة التحكم والحساسات"], ["vehicle", "المركبات والمعدات"], ["other", "أخرى"]];
+const MH = ["رقم الطلب", "تاريخ الطلب", "المزرعة", "الدورة", "العنبر", "الأولوية", "نوع المشكلة", "الوصف", "الحالة", "المسؤول", "تاريخ الحل", "ملاحظات الحل"];
+const MQ = "id,req_no,farm_id,cycle_id,house_id,priority,issue_type,description,requested_by,request_date,status,assigned_to,resolution_notes,resolved_date,farms(name),cycles(cycle_no),houses(no)";
+const mno = x => "MR-" + String(x).padStart(5, "0");
+let msub = "dash", med = null, MC = {}, mrows = [];
+async function mSt(id, v) { const {error} = await sb.from("maint_requests").update({status: v, resolved_date: v == "resolved" ? tdy() : null}).eq("id", id); if (error) return toast("❌ " + error.message, 1); toast("✅ تم الحفظ"); render(); }
+function mEd(id) { med = MC[id]; msub = "list"; render(); }
+async function maint() {
+  const tabs = `<div class="row np">${[["dash", "📊 لوحة الصيانة"], ["list", "🔧 طلبات الصيانة"], ["mrep", "📋 تقرير الصيانة"]].map(([k, l]) => `<button class="${msub == k ? "" : "ghost"}" onclick="msub='${k}';med=null;render()">${l}</button>`).join("")}</div>`;
+  const [{data: cy}, {data: hs}] = await Promise.all([sb.from("cycles").select("id,farm_id,cycle_no").order("start_date", {ascending: false}), sb.from("houses").select("id,no,cycle_id").order("no")]);
+  const cys = cy || [], H_ = hs || [], fname = id => (FARMS.find(f => f.id == id) || {}).name || "";
+  const cyo = fid => cys.filter(c => !fid || c.farm_id == fid).map(c => `<option value="${c.id}">${esc(fname(c.farm_id))} – دورة ${c.cycle_no}</option>`).join("");
+  if (msub == "dash") {
+    const [{data, error}, {data: em}] = await Promise.all([sb.from("maint_requests").select("priority,issue_type,status,farm_id,request_date,resolved_date").limit(5000), sb.from("maint_requests").select(MQ).eq("priority", "emergency").neq("status", "resolved").order("request_date").limit(10)]);
+    if (error) return $("#m").innerHTML = tabs + `<div class="card bad">${esc(error.message)}</div>`;
+    const D = data || [], cnt = x => D.filter(r => r.status == x).length, un = D.filter(r => r.status != "resolved"), rs = D.filter(r => r.resolved_date && r.request_date);
+    const avg = rs.length ? rs.reduce((a, r) => a + (new Date(r.resolved_date) - new Date(r.request_date)) / 864e5, 0) / rs.length : null;
+    const kp = [["🟠", "مفتوح", cnt("open")], ["🔧", "جاري العمل عليه", cnt("in_progress")], ["✅", "تم الحل", cnt("resolved")], ["🚨", "طارئ غير محلول", un.filter(r => r.priority == "emergency").length], ["⏱️", "متوسط زمن الحل (يوم)", n(avg, 1)], ["🧾", "إجمالي الطلبات", D.length]];
+    const bars = L => { const mx = Math.max(1, ...L.map(x => x[1])); return L.length ? L.map(([l, v]) => `<div style="display:flex;align-items:center;gap:10px;margin:6px 0"><span style="min-width:150px;font-size:13px">${l}</span><div class="pbar" style="flex:1;margin:0"><b style="width:${v / mx * 100}%"></b></div><b>${v}</b></div>`).join("") : `<span class="k">لا توجد طلبات</span>`; };
+    const bt = MTYPE.map(([v, l]) => [l, un.filter(r => r.issue_type == v).length]).filter(x => x[1]), bf = FARMS.map(f => [esc(f.name), un.filter(r => r.farm_id == f.id).length]).filter(x => x[1]);
+    $("#m").innerHTML = tabs + `<div class="grid">${kp.map(([i, k, v]) => `<div class="card"><div class="k"><span>${i}</span> ${k}</div><div class="v">${v}</div></div>`).join("")}</div>
+    <div class="c2" style="margin-top:12px"><div class="card"><div class="k" style="font-weight:600">غير المحلولة حسب النوع</div>${bars(bt)}</div><div class="card"><div class="k" style="font-weight:600">غير المحلولة حسب المزرعة</div>${bars(bf)}</div></div>
+    <h2>الطلبات الطارئة المفتوحة</h2><div class="card tw">${(em || []).length ? `<table><tr><th>رقم الطلب</th><th>المزرعة</th><th>نوع المشكلة</th><th>الحالة</th><th>أيام مفتوح</th></tr>${em.map(r => `<tr><td>${mno(r.req_no)}</td><td>${esc((r.farms || {}).name)}</td><td>${lbl(MTYPE, r.issue_type)}</td><td>${lbl(MST, r.status)}</td><td class="bad">${Math.round((new Date(tdy()) - new Date(r.request_date)) / 864e5)}</td></tr>`).join("")}</table>` : `<span class="k">لا توجد طلبات</span>`}</div>`;
+  } else if (msub == "list") {
+    const e = med, cyOpt = fid => `<option value="">— بدون دورة</option>` + cys.filter(c => c.farm_id == fid).map(c => `<option value="${c.id}">دورة ${c.cycle_no}</option>`).join("");
+    $("#m").innerHTML = tabs + `<details class="card" ${e || pf ? "open" : ""}><summary style="cursor:pointer;font-weight:700"><span>${e ? "✏️ تعديل الطلب" : "➕ طلب صيانة جديد"}</span> ${e ? mno(e.req_no) : ""}</summary><div class="hs" style="margin-top:10px">${fField("m1", "المزرعة")}${sel("m2", "الدورة", "")}${sel("m3", "العنبر", "")}${sel("m4", "الأولوية", po(MPRI))}${sel("m5", "نوع المشكلة", po(MTYPE))}${sel("m6", "الحالة", po(MST))}${inp("m7", "تاريخ الطلب", "date", e ? e.request_date : tdy())}${inp("m8", "مقدم الطلب", "text", esc(e ? e.requested_by || "" : localStorage.mReq || ""))}${inp("m9", "المسؤول عن التنفيذ", "text", esc(e ? e.assigned_to || "" : ""))}</div>
+    <label class="k">وصف المشكلة</label><textarea id="m10" rows="3">${esc(e ? e.description : "")}</textarea><label class="k">ملاحظات الحل</label><textarea id="m11" rows="2">${esc(e ? e.resolution_notes : "")}</textarea>
+    <div class="row" style="margin:10px 0"><button id="mk">💾 حفظ الطلب</button>${e ? `<button type="button" class="ghost" onclick="med=null;render()">إلغاء</button>` : ""}</div></details>
+    <div class="card hs np" style="margin-top:12px">${fField("l1", "المزرعة", "كل المزارع", 1)}${sel("l2", "الحالة", `<option value="">كل الحالات</option>` + po(MST))}${sel("l3", "الأولوية", `<option value="">كل الأولويات</option>` + po(MPRI))}</div><div class="hs" id="ml" style="margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))"></div>`;
+    const fh = () => { $("#m3").innerHTML = `<option value="">عام (كل المزرعة)</option>` + H_.filter(h => h.cycle_id == $("#m2").value).map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join(""); };
+    const fc = first => { $("#m2").innerHTML = cyOpt($("#m1").value); const lc = cys.find(c => c.farm_id == $("#m1").value); $("#m2").value = first && e ? (e.cycle_id || "") : (lc ? lc.id : ""); fh(); if (first && e) $("#m3").value = e.house_id || ""; };
+    $("#m1").value = e ? e.farm_id : (pf || (cys.find(c => c.id == cur) || {}).farm_id || ""); if (e) { $("#m4").value = e.priority; $("#m5").value = e.issue_type; $("#m6").value = e.status; }
+    $("#m1").onchange = () => fc(false); $("#m2").onchange = fh; fc(true);
+    $("#mk").onclick = async () => {
+      if (!$("#m1").value || !$("#m10").value.trim()) return toast("⚠️ أكمل الحقول المطلوبة", 1);
+      const st = $("#m6").value, o = {farm_id: $("#m1").value, cycle_id: $("#m2").value || null, house_id: $("#m3").value || null, priority: $("#m4").value, issue_type: $("#m5").value, status: st, request_date: $("#m7").value, requested_by: $("#m8").value.trim() || null, assigned_to: $("#m9").value.trim() || null, description: $("#m10").value.trim(), resolution_notes: $("#m11").value.trim() || null, resolved_date: st == "resolved" ? ((e && e.resolved_date) || tdy()) : null};
+      localStorage.mReq = o.requested_by || "";
+      if (e) { const {error} = await sb.from("maint_requests").update(o).eq("id", e.id); if (error) return toast("❌ " + error.message, 1); med = null; toast("✅ تم حفظ التعديل"); return render(); }
+      const d = await sb.from("maint_requests").select("id").match({farm_id: o.farm_id, issue_type: o.issue_type, request_date: o.request_date, description: o.description}).limit(1); if ((d.data || []).length) return toast("⚠️ هذا السجل مسجل مسبقاً", 1);
+      const {data, error} = await sb.from("maint_requests").insert(o).select("req_no").single(); if (error) return toast("❌ " + error.message, 1); toast("✅ تم الحفظ — رقم الطلب " + mno(data.req_no)); render();
+    };
+    const card = r => `<div class="card" style="border-inline-start:5px solid ${r.priority == "emergency" ? "var(--bad)" : "var(--pri)"}"><div class="vhd" style="margin:0"><b>${mno(r.req_no)}</b>${r.priority == "emergency" ? `<span style="background:var(--bad);color:#fff;border-radius:12px;padding:1px 9px;font-size:12px">${lbl(MPRI, r.priority)}</span>` : `<span class="k">${lbl(MPRI, r.priority)}</span>`}<b>${lbl(MTYPE, r.issue_type)}</b></div>
+      <div class="k" style="margin-top:4px">${esc((r.farms || {}).name)}${r.cycles ? ` · دورة ${r.cycles.cycle_no}` : ""}${r.houses ? ` · عنبر ${r.houses.no}` : ""}</div><div style="margin:8px 0;white-space:pre-wrap">${esc(r.description)}</div>
+      <div class="k"><span>مقدم الطلب:</span> ${esc(r.requested_by)} · ${r.request_date}</div>${r.assigned_to ? `<div class="k"><span>المسؤول عن التنفيذ:</span> ${esc(r.assigned_to)}</div>` : ""}${r.resolution_notes ? `<div class="k"><span>ملاحظات الحل:</span> ${esc(r.resolution_notes)}</div>` : ""}${r.resolved_date ? `<div class="k"><span>تاريخ الحل:</span> ${r.resolved_date}</div>` : ""}
+      <div class="row" style="margin:8px 0 0"><select onchange="mSt('${r.id}',this.value)">${po(MST).replace(`value="${r.status}"`, `value="${r.status}" selected`)}</select><button type="button" class="ghost" onclick="mEd('${r.id}')">✏️</button><button type="button" class="ghost" onclick="del('maint_requests','${r.id}')">🗑</button></div></div>`;
+    const run = async () => {
+      let q = sb.from("maint_requests").select(MQ).limit(300); if ($("#l1").value) q = q.eq("farm_id", $("#l1").value); if ($("#l2").value) q = q.eq("status", $("#l2").value); if ($("#l3").value) q = q.eq("priority", $("#l3").value);
+      const {data, error} = await q; if (error) return $("#ml").innerHTML = `<div class="card bad">${esc(error.message)}</div>`;
+      const L = (data || []).sort((a, b) => (a.status == "resolved") - (b.status == "resolved") || (a.priority == "emergency" ? 0 : 1) - (b.priority == "emergency" ? 0 : 1) || b.req_no - a.req_no); L.forEach(r => MC[r.id] = r);
+      $("#ml").innerHTML = L.length ? L.map(card).join("") : `<div class="card">لا توجد طلبات مطابقة</div>`;
+    };
+    ["l1", "l2", "l3"].forEach(i => $("#" + i).onchange = run); run();
+  } else {
+    $("#m").innerHTML = tabs + `<div class="card hs np">${fField("x1", "المزرعة", "كل المزارع", 1)}${sel("x2", "الدورة", `<option value="">كل الدورات</option>` + cyo(""))}${sel("x3", "الحالة", `<option value="">كل الحالات</option>` + po(MST))}${sel("x4", "الأولوية", `<option value="">كل الأولويات</option>` + po(MPRI))}${sel("x5", "نوع المشكلة", `<option value="">كل الأنواع</option>` + po(MTYPE))}${inp("x6", "من تاريخ", "date")}${inp("x7", "إلى تاريخ", "date")}</div>
+    <div class="row np" style="margin:10px 0"><button id="xa">🔍 عرض</button><button id="xx">📗 تصدير Excel</button><button id="xp" title="في نافذة الطباعة اختر «حفظ بصيغة PDF»">📕 تصدير PDF</button><span id="xc" class="k"></span></div>
+    <div class="pr"><h2>تقرير الصيانة</h2><div><span>تاريخ الطباعة:</span> ${tdy()}</div></div><div id="xr" class="card tw"></div>`;
+    const run = async () => {
+      let q = sb.from("maint_requests").select(MQ).order("req_no", {ascending: false}).limit(1000);
+      [["x1", "farm_id"], ["x2", "cycle_id"], ["x3", "status"], ["x4", "priority"], ["x5", "issue_type"]].forEach(([i, f]) => { if ($("#" + i).value) q = q.eq(f, $("#" + i).value); }); if ($("#x6").value) q = q.gte("request_date", $("#x6").value); if ($("#x7").value) q = q.lte("request_date", $("#x7").value);
+      const {data, error} = await q; if (error) return $("#xr").innerHTML = `<span class="bad">${esc(error.message)}</span>`; const L = data || [];
+      mrows = L.map(r => [mno(r.req_no), r.request_date, (r.farms || {}).name || "", (r.cycles || {}).cycle_no || "", (r.houses || {}).no || "", lbl(MPRI, r.priority), lbl(MTYPE, r.issue_type), r.description || "", lbl(MST, r.status), r.assigned_to || "", r.resolved_date || "", r.resolution_notes || ""]);
+      $("#xc").innerHTML = `<b>${L.length}</b> <span>طلب</span>`;
+      $("#xr").innerHTML = L.length ? `<table><tr>${MH.map(h => `<th>${h}</th>`).join("")}</tr>${mrows.map(r => `<tr>${r.map((c, i) => `<td style="${i == 7 || i == 11 ? "white-space:normal;text-align:start" : ""}">${esc(c)}</td>`).join("")}</tr>`).join("")}</table>` : `<span class="k">لا توجد طلبات مطابقة</span>`;
+    };
+    $("#x1").onchange = () => { $("#x2").innerHTML = `<option value="">كل الدورات</option>` + cyo($("#x1").value); run(); };
+    ["x2", "x3", "x4", "x5", "x6", "x7"].forEach(i => $("#" + i).onchange = run); $("#xa").onclick = run; $("#xp").onclick = () => print();
+    $("#xx").onclick = () => {
+      if (!mrows.length) return alert("لا توجد بيانات للتصدير"); if (!window.XLSX) return alert("تعذر تحميل مكتبة Excel (تحقق من الإنترنت)");
+      const ws = XLSX.utils.aoa_to_sheet([MH.map(L_), ...mrows.map(r => r.map((c, i) => [5, 6, 8].includes(i) ? L_(c) : c))]); ws["!cols"] = [11, 12, 14, 9, 8, 12, 24, 40, 16, 16, 12, 30].map(w => ({wch: w}));
+      const wb = XLSX.utils.book_new(); if (!EN) wb.Workbook = {Views: [{RTL: true}]}; XLSX.utils.book_append_sheet(wb, ws, "Maintenance"); XLSX.writeFile(wb, "maintenance-report-" + tdy() + ".xlsx");
+    };
+    run();
+  }
 }
 </script>
 </body>
