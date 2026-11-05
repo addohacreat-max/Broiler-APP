@@ -69,7 +69,7 @@ const D = {"🐔 شركة دواجن الدوحة":"🐔 Addoha Poultry Company"
 "كل المزارع":"All farms","كل الدورات":"All cycles","من تاريخ":"From date","إلى تاريخ":"To date","اسم الطبيب":"Veterinarian","الكل":"All","مطلوب":"Required","غير مطلوب":"Not required","فحص معملي":"Lab test",
 "🔍 عرض":"🔍 Show","📗 تصدير Excel":"📗 Export Excel","📕 تصدير PDF":"📕 Export PDF","زيارة":"visits","سجل عنبر":"house records","لا توجد زيارات مطابقة":"No matching visits","تقرير الزيارات البيطرية":"Veterinary visits report",
 "الطبيب":"Veterinarian","الملاحظات":"Notes","الفحص المعملي":"Lab test","لا توجد بيانات للتصدير":"No data to export","تعذر تحميل مكتبة Excel (تحقق من الإنترنت)":"Could not load the Excel library (check your connection)",
-"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","الصيانة":"Maintenance","📊 لوحة الصيانة":"📊 Maintenance dashboard","🔧 طلبات الصيانة":"🔧 Maintenance requests","📋 تقرير الصيانة":"📋 Maintenance report","تقرير الصيانة":"Maintenance report","➕ طلب صيانة جديد":"➕ New maintenance request","✏️ تعديل الطلب":"✏️ Edit request",
+"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","⚠️ تم إنشاء الدورة سابقاً":"⚠️ This cycle has already been created","⚠️ المزرعة في حالة إنتاج حالياً":"⚠️ The farm is currently in production","⚠️ تم فتح مهمة تجهيز لهذه الدورة سابقاً":"⚠️ A preparation task was already opened for this cycle","إضافة رقم دورة":"Add a cycle number","⚠️ صيغة رقم الدورة غير صحيحة (مثال: 1-28)":"⚠️ Invalid cycle number format (example: 1-28)","⚠️ هذا الرقم موجود مسبقاً":"⚠️ This number already exists","الصيانة":"Maintenance","📊 لوحة الصيانة":"📊 Maintenance dashboard","🔧 طلبات الصيانة":"🔧 Maintenance requests","📋 تقرير الصيانة":"📋 Maintenance report","تقرير الصيانة":"Maintenance report","➕ طلب صيانة جديد":"➕ New maintenance request","✏️ تعديل الطلب":"✏️ Edit request",
 "طارئ":"Emergency","غير طارئ":"Non-emergency","مفتوح":"Open","جاري العمل عليه":"In progress","تم الحل":"Resolved",
 "خطوط العلف":"Feed lines","خطوط المياه":"Water lines","الكهرباء":"Electricity","السكن":"Housing / accommodation","التهوية والمراوح":"Ventilation & fans","التدفئة والغاز":"Heating & gas","التبريد (وسادات / رشاشات)":"Cooling (pads / sprinklers)","المولدات والطاقة الاحتياطية":"Generators & backup power","المباني والأسقف والأبواب":"Buildings, roofs & doors","أجهزة التحكم والحساسات":"Controllers & sensors","المركبات والمعدات":"Vehicles & equipment",
 "الأولوية":"Priority","نوع المشكلة":"Problem type","تاريخ الطلب":"Request date","مقدم الطلب":"Requested by","المسؤول عن التنفيذ":"Assigned to","وصف المشكلة":"Problem description","ملاحظات الحل":"Resolution notes","— بدون دورة":"— No cycle","عام (كل المزرعة)":"General (whole farm)","💾 حفظ الطلب":"💾 Save request",
@@ -95,7 +95,7 @@ const D = {"🐔 شركة دواجن الدوحة":"🐔 Addoha Poultry Company"
 const DM = Object.fromEntries(Object.entries(D).map(([k, v]) => [nz(k), v]));
 function tr(x) {
   const c = nz(x); if (!c) return x; let r = DM[c];
-  if (r === undefined) { r = c.replace(/تم حفظ (\d+) عنبر/, "Saved $1 houses").replace(/عنبر\s+(\d+)/g, "House $1").replace(/دورة\s+/g, "Cycle ").replace(/المتوسط/g, "Avg").replace(/تم الحفظ — رقم الطلب/g, "Saved — request no.").replace(/التطهير – المرحلة (\d+)/g, "Disinfection – stage $1"); if (r === c) return x; }
+  if (r === undefined) { r = c.replace(/تم حفظ (\d+) عنبر/, "Saved $1 houses").replace(/عنبر\s+(\d+)/g, "House $1").replace(/دورة\s+/g, "Cycle ").replace(/المتوسط/g, "Avg").replace(/تم إنشاؤها/g, "already created").replace(/تم الحفظ — رقم الطلب/g, "Saved — request no.").replace(/التطهير – المرحلة (\d+)/g, "Disinfection – stage $1"); if (r === c) return x; }
   return x.replace(x.trim(), () => r);
 }
 function trAll(root) {
@@ -116,8 +116,8 @@ function loginUI() {
   $("#go").onclick = async () => { const {error} = await sb.auth.signInWithPassword({email: $("#em").value, password: $("#pw").value}); error ? $("#er").textContent = ({"Invalid login credentials": "البريد غير مسجل أو كلمة المرور خاطئة", "Email not confirmed": "الحساب غير مؤكد: فعّل Confirm user من Supabase"})[error.message] || error.message : start(); };
 }
 async function start(sel) {
-  const {data} = await sb.from("cycles").select("id,cycle_no,start_date,farms(name)").order("start_date", {ascending: false});
-  await loadFarms(); cycles = data || []; cur = sel || cycles[0]?.id; if (!cycles.length) tab = "setup";
+  const {data} = await sb.from("cycles").select("id,farm_id,cycle_no,start_date,farms(name)").order("start_date", {ascending: false});
+  await loadFarms(); await loadCodes(); cycles = data || []; cur = sel || cycles[0]?.id; if (!cycles.length) tab = "setup";
   app.innerHTML = `<header><h1>🐔 شركة دواجن الدوحة</h1><select id="cy">${cycles.map(c => `<option value="${c.id}">${c.farms.name} – دورة ${c.cycle_no}</option>`).join("")}</select>${langBtn("color:#fff;border-color:#fff")}<button class="ghost" style="color:#fff;border-color:#fff" onclick="sb.auth.signOut().then(loginUI)">خروج</button></header><main id="m"></main>
   <nav>${[["dash","اللوحة"],["farms","حالة المزارع"],["entry","إدخال يومي"],["rec","علف/صحة/مخزون"],["vet","الرعاية الصحية"],["lab","المعمل"],["bio","الأمن الحيوي"],["maint","الصيانة"],["rep","التقارير"],["setup","الدورات"]].map(([t, l]) => `<button data-t="${t}" title="${l}"><b class="ic"><svg viewBox="0 0 24 24">${ICONS[t]}</svg><i class="bdg" id="bdg-${t}"></i></b><span>${l}</span></button>`).join("")}</nav>`;
   $("#cy").onchange = e => { cur = e.target.value; load(); };
@@ -206,19 +206,19 @@ function rep() {
 }
 function setup() {
   const sh = houses.length ? `<h2>أعداد الكتاكيت في العنابر الحالية</h2><div class="hs">${houses.map(h => `<div class="card" data-hc="${h.id}"><b>عنبر ${h.no}</b><label>عدد الكتاكيت</label><input type="number" data-f="chicks" value="${h.chicks ?? 0}"><label>تاريخ التسكين</label><input type="date" data-f="placement_date" value="${h.placement_date || ""}"><label>المصدر</label><input data-f="chick_source" list="srcs" value="${esc(h.chick_source || "")}"><label>ملاحظات</label><textarea data-f="notes" rows="2">${esc(h.notes)}</textarea></div>`).join("")}</div><div class="row" style="margin-top:10px"><button id="sh">💾 حفظ الأعداد</button></div>` : "";
-  $("#m").innerHTML = `<datalist id="srcs">${[...new Set(houses.map(h => h.chick_source).filter(Boolean))].map(x => `<option value="${esc(x)}">`).join("")}</datalist><h2>إنشاء دورة جديدة</h2><div class="card hs">${fField("sf", "اسم المزرعة")}${inp("sc", "رقم الدورة")}${inp("sm", "المدير")}${inp("sn", "عدد العنابر", "number", "12")}${inp("sk", "كتاكيت لكل عنبر (افتراضي)", "number", "25000")}${inp("sd", "تاريخ التسكين (افتراضي)", "date", tdy())}</div>
+  $("#m").innerHTML = `<datalist id="srcs">${[...new Set(houses.map(h => h.chick_source).filter(Boolean))].map(x => `<option value="${esc(x)}">`).join("")}</datalist><h2>إنشاء دورة جديدة</h2><div class="card hs">${fField("sf", "اسم المزرعة")}${cField()}${inp("sm", "المدير")}${inp("sn", "عدد العنابر", "number", "12")}${inp("sk", "كتاكيت لكل عنبر (افتراضي)", "number", "25000")}${inp("sd", "تاريخ التسكين (افتراضي)", "date", tdy())}</div>
   <div class="k" style="margin:10px 0 4px">عدّل تاريخ التسكين والمصدر لكل عنبر عند الحاجة</div><div class="hs" id="hg"></div><div class="row" style="margin-top:10px"><button id="mk">➕ إنشاء الدورة</button></div>${sh}`;
   const grid = () => { const N = Math.max(1, Math.min(60, +$("#sn").value || 1)), old = [...document.querySelectorAll("#hg [data-g]")].map(c => [...c.querySelectorAll("[data-f]")].map(i => i.value));
     $("#hg").innerHTML = Array.from({length: N}, (_, i) => `<div class="card" data-g="${i + 1}"><b>عنبر ${i + 1}</b><label>عدد الكتاكيت</label><input type="number" data-f="chicks" value="${(old[i] || [])[0] ?? $("#sk").value}"><label>تاريخ التسكين</label><input type="date" data-f="placement_date" value="${(old[i] || [])[1] ?? $("#sd").value}"><label>المصدر</label><input data-f="chick_source" list="srcs" value="${(old[i] || [])[2] ?? ""}"></div>`).join(""); };
-  grid(); $("#sn").onchange = grid;
+  grid(); $("#sn").onchange = grid; $("#sf").onchange = markCodes; markCodes();
   $("#sk").onchange = () => document.querySelectorAll('#hg [data-f="chicks"]').forEach(i => i.value = $("#sk").value);
   $("#sd").onchange = () => document.querySelectorAll('#hg [data-f="placement_date"]').forEach(i => i.value = $("#sd").value);
   $("#mk").onclick = async () => {
     const fid = $("#sf").value, no = $("#sc").value.trim(); if (!fid || !no) return toast("⚠️ أكمل الحقول المطلوبة", 1);
     const hs = [...document.querySelectorAll("#hg [data-g]")].map(c => { const o = {no: +c.dataset.g}; c.querySelectorAll("[data-f]").forEach(i => o[i.dataset.f] = i.dataset.f == "chicks" ? +i.value || 0 : (i.value.trim() || null)); return o; });
     if (hs.some(h => !h.placement_date)) return toast("⚠️ أدخل تاريخ التسكين لكل عنبر", 1);
-    const dup = await sb.from("cycles").select("id").eq("farm_id", fid).eq("cycle_no", no).limit(1); if ((dup.data || []).length) return toast("⚠️ هذا السجل مسجل مسبقاً", 1);
-    const c = await sb.from("cycles").insert({farm_id: fid, cycle_no: no, start_date: hs.map(h => h.placement_date).sort()[0], manager: $("#sm").value.trim() || null}).select("id").single(); if (c.error) return toast("❌ " + c.error.message, 1);
+    const dup = await sb.from("cycles").select("id").eq("farm_id", fid).eq("cycle_no", no).limit(1); if ((dup.data || []).length) return toast("⚠️ تم إنشاء الدورة سابقاً", 1);
+    const c = await sb.from("cycles").insert({farm_id: fid, cycle_no: no, start_date: hs.map(h => h.placement_date).sort()[0], manager: $("#sm").value.trim() || null}).select("id").single(); if (c.error) return toast(c.error.code == "23505" ? "⚠️ تم إنشاء الدورة سابقاً" : "❌ " + c.error.message, 1);
     const h = await sb.from("houses").insert(hs.map(x => ({...x, cycle_id: c.data.id}))); if (h.error) { await sb.from("cycles").delete().eq("id", c.data.id); return toast("❌ " + h.error.message, 1); }
     toast("✅ تم الحفظ"); tab = "entry"; start(c.data.id);
   };
@@ -532,8 +532,8 @@ async function swabReq(id) {
   if (error) return toast("❌ " + error.message, 1); toast("✅ تم إرسال طلب المسحات إلى المعمل"); render();
 }
 async function bio() {
-  const [{data: tk}, {data: cy}, {data: hs}, {data: sw}] = await Promise.all([sb.from("biosec_tasks").select("*,farms(name),cycles(cycle_no),biosec_stages(*)").order("start_date", {ascending: false}).limit(100),
-    sb.from("cycles").select("id,farm_id,cycle_no").order("start_date", {ascending: false}), sb.from("houses").select("id,no,cycle_id").gt("chicks", 0).order("no"), sb.from("lab_tests").select("biosec_task_id,result_date").eq("source", "swab")]);
+  const [{data: tk}, {data: cy}, {data: hs}, {data: sw}, {data: sm}] = await Promise.all([sb.from("biosec_tasks").select("*,farms(name),cycles(cycle_no),biosec_stages(*)").order("start_date", {ascending: false}).limit(100),
+    sb.from("cycles").select("id,farm_id,cycle_no").order("start_date", {ascending: false}), sb.from("houses").select("id,no,cycle_id,chicks").gt("chicks", 0).order("no"), sb.from("lab_tests").select("biosec_task_id,result_date").eq("source", "swab"), sb.from("house_summary").select("house_id,mortality,sold")]);
   const T_ = tk || [], cys = cy || [], H_ = hs || [], HM = Object.fromEntries(H_.map(h => [h.id, h])), SW = {}; (sw || []).forEach(x => (SW[x.biosec_task_id] = SW[x.biosec_task_id] || []).push(x)); T_.forEach(t => BT[t.id] = t);
   const card = t => { const S = [...(t.biosec_stages || [])].sort((a, b) => a.seq - b.seq), dn = S.filter(x => x.status == "done").length, pc = S.length ? Math.round(dn / S.length * 100) : 0, w = SW[t.id] || [], hn = (t.house_ids || []).map(i => (HM[i] || {}).no).filter(Boolean).sort((a, b) => a - b);
     return `<div class="card vc" style="margin-bottom:12px"><div class="vhd"><b>${esc((t.farms || {}).name)}</b><span>دورة ${(t.cycles || {}).cycle_no || ""}</span><span class="k"><span>البيوت:</span> ${hn.join(", ")}</span><span class="${t.status == "done" ? "" : "bad"}">${t.status == "done" ? "مكتملة" : "جارية"}</span><button class="ghost np" onclick="bioDel('${t.id}')">🗑</button></div>
@@ -553,8 +553,10 @@ async function bio() {
   $("#bk").onclick = async () => {
     const cid = $("#b2").value, ids = [...document.querySelectorAll("#bh [data-bh]")].filter(i => i.checked).map(i => i.dataset.bh);
     if (!cid || !ids.length) return toast("⚠️ اختر المزرعة والدورة وبيتاً واحداً على الأقل", 1);
-    if (T_.some(t => t.cycle_id == cid && t.status == "open")) return toast("⚠️ توجد مهمة مفتوحة لهذه الدورة", 1);
-    const {data: t, error} = await sb.from("biosec_tasks").insert({farm_id: $("#b1").value, cycle_id: cid, house_ids: ids, start_date: $("#b3").value, end_date: $("#b4").value || null, notes: $("#b5").value.trim() || null}).select("id").single(); if (error) return toast("❌ " + error.message, 1);
+    const SMm = Object.fromEntries((sm || []).map(r => [r.house_id, r])), lc = cys.find(c => c.farm_id == $("#b1").value);
+    if (lc && H_.filter(h => h.cycle_id == lc.id).reduce((a, h) => a + h.chicks - ((SMm[h.id] || {}).mortality || 0) - ((SMm[h.id] || {}).sold || 0), 0) > 0) return toast("⚠️ المزرعة في حالة إنتاج حالياً", 1);
+    if (T_.some(t => t.cycle_id == cid && t.farm_id == $("#b1").value)) return toast("⚠️ تم فتح مهمة تجهيز لهذه الدورة سابقاً", 1);
+    const {data: t, error} = await sb.from("biosec_tasks").insert({farm_id: $("#b1").value, cycle_id: cid, house_ids: ids, start_date: $("#b3").value, end_date: $("#b4").value || null, notes: $("#b5").value.trim() || null}).select("id").single(); if (error) return toast(error.code == "23505" ? "⚠️ تم فتح مهمة تجهيز لهذه الدورة سابقاً" : "❌ " + error.message, 1);
     const r = await sb.from("biosec_stages").insert(BIO_STAGES.map(([k, nm], i) => ({task_id: t.id, seq: i + 1, kind: k, name: nm}))); if (r.error) return toast("❌ " + r.error.message, 1);
     pf = ""; toast("✅ تم الحفظ"); render();
   };
@@ -636,6 +638,27 @@ async function maint() {
     };
     run();
   }
+}
+
+// ===== أرقام الدورات =====
+const DEF_CODES = ["5-26", "6-26", "7-26", "8-26", "9-26", "1-27", "2-27", "3-27", "4-27", "5-27", "6-27", "7-27", "8-27", "9-27"], PER_YEAR = 9;
+let CODES = [...DEF_CODES], pcode = "";
+async function loadCodes() { const {data, error} = await sb.from("cycle_codes").select("code,year,seq").order("year").order("seq"); const L = (data || []).map(x => x.code).filter(Boolean); if (!error && L.length) CODES = L; }
+const nextCode = () => { const [q, y] = CODES[CODES.length - 1].split("-").map(Number); return q < PER_YEAR ? `${q + 1}-${String(y).padStart(2, "0")}` : `1-${String(y + 1).padStart(2, "0")}`; };
+const cField = () => `<div><label>رقم الدورة</label><div style="display:flex;gap:6px"><select id="sc" style="flex:1">${CODES.map(c => `<option value="${c}" ${c == pcode ? "selected" : ""}>${c}</option>`).join("")}</select><button type="button" class="ghost" data-nolock="1" title="إضافة رقم دورة" onclick="togCode()">➕</button></div>
+  <div id="nc" style="display:none;gap:6px;margin-top:6px"><input id="nci" value="${nextCode()}" style="flex:1"><button type="button" onclick="saveCode()">حفظ</button></div><div id="nce" class="bad" style="font-size:12px"></div></div>`;
+const togCode = () => { const b = document.getElementById("nc"); b.style.display = b.style.display == "flex" ? "none" : "flex"; };
+function markCodes() {
+  const sc = $("#sc"), used = cycles.filter(c => c.farm_id == $("#sf").value).map(c => c.cycle_no), O = sc.options ? [...sc.options] : [];
+  O.forEach(o => { const u = used.includes(o.value); o.disabled = u; o.textContent = o.value + (u ? " — تم إنشاؤها" : ""); });
+  if (O.length && sc.selectedIndex >= 0 && O[sc.selectedIndex].disabled) { const f = O.find(o => !o.disabled); if (f) sc.value = f.value; }
+}
+async function saveCode() {
+  const er = document.getElementById("nce"), m = /^(\d{1,2})-(\d{2})$/.exec(document.getElementById("nci").value.trim());
+  if (!m) { er.textContent = "⚠️ صيغة رقم الدورة غير صحيحة (مثال: 1-28)"; return; }
+  const v = `${+m[1]}-${m[2]}`; if (CODES.includes(v)) { er.textContent = "⚠️ هذا الرقم موجود مسبقاً"; return; }
+  const {error} = await sb.from("cycle_codes").insert({code: v, year: 2000 + +m[2], seq: +m[1]}); if (error) { er.textContent = "❌ " + error.message; return; }
+  pcode = v; await loadCodes(); toast("✅ تم الحفظ"); render();
 }
 </script>
 </body>
