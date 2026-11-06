@@ -69,7 +69,12 @@ const D = {"🐔 شركة دواجن الدوحة":"🐔 Addoha Poultry Company"
 "كل المزارع":"All farms","كل الدورات":"All cycles","من تاريخ":"From date","إلى تاريخ":"To date","اسم الطبيب":"Veterinarian","الكل":"All","مطلوب":"Required","غير مطلوب":"Not required","فحص معملي":"Lab test",
 "🔍 عرض":"🔍 Show","📗 تصدير Excel":"📗 Export Excel","📕 تصدير PDF":"📕 Export PDF","زيارة":"visits","سجل عنبر":"house records","لا توجد زيارات مطابقة":"No matching visits","تقرير الزيارات البيطرية":"Veterinary visits report",
 "الطبيب":"Veterinarian","الملاحظات":"Notes","الفحص المعملي":"Lab test","لا توجد بيانات للتصدير":"No data to export","تعذر تحميل مكتبة Excel (تحقق من الإنترنت)":"Could not load the Excel library (check your connection)",
-"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","الجودة":"Quality","الإنتاج":"Production","مهام عامة":"General tasks","قيد المتابعة":"Under follow-up","مغلق":"Closed","نفوق يومي مرتفع":"High daily mortality","النافق:":"Mortality:","الوزن (جم):":"Weight (g):","الحد:":"Limit:","المصدر:":"Source:",
+"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","الإعدادات":"Settings","👥 المستخدمون":"👥 Users","🔑 الأدوار والصلاحيات":"🔑 Roles & permissions","📋 ملخص الصلاحيات":"📋 Permissions summary","الاسم":"Name","الدور (الوظيفة)":"Role (job title)","— بدون صلاحية":"— No access","فعّال":"Active","(حسابك)":"(you)",
+"🚫 إلغاء الصلاحية":"🚫 Revoke access","ℹ️ لإضافة مستخدم جديد: افتح Supabase ثم Authentication ثم Users ثم Add user. يظهر هنا تلقائياً، ثم امنحه دوراً.":"ℹ️ To add a new user: open Supabase, then Authentication, then Users, then Add user. He appears here automatically; then give him a role.",
+"➕ دور جديد":"➕ New role","اسم الدور":"Role name","وصف الدور":"Role description","التبويب":"Tab","مستوى الصلاحية":"Access level","بدون":"None","عرض فقط":"View only","كامل":"Full","المزارع المسموحة (بدون اختيار = كل المزارع)":"Allowed farms (none selected = all farms)",
+"💾 حفظ الصلاحيات":"💾 Save permissions","🗑 حذف الدور":"🗑 Delete role","✅ تم حفظ الصلاحيات":"✅ Permissions saved","كل المزارع":"All farms","🖨️ طباعة":"🖨️ Print","الدور":"Role","المزارع":"Farms",
+"هذا حسابك — قد يفقد التغيير صلاحيتك. هل تتابع؟":"This is your own account — the change may remove your access. Continue?","إلغاء صلاحية هذا المستخدم؟":"Revoke this user's access?","حذف الدور؟ سيفقد المستخدمون المرتبطون به صلاحياتهم.":"Delete the role? Users linked to it will lose their access.",
+"لا توجد صلاحيات لحسابك":"Your account has no permissions","تواصل مع المسؤول لتفعيل الحساب ومنحه دوراً.":"Contact the administrator to activate the account and give it a role.","⚠️ أدخل اسم الدور":"⚠️ Enter the role name","الجودة":"Quality","الإنتاج":"Production","مهام عامة":"General tasks","قيد المتابعة":"Under follow-up","مغلق":"Closed","نفوق يومي مرتفع":"High daily mortality","النافق:":"Mortality:","الوزن (جم):":"Weight (g):","الحد:":"Limit:","المصدر:":"Source:",
 "تاريخ الاستحقاق":"Due date","تاريخ الاستحقاق:":"Due:","سجل المتابعة":"Follow-up log","ملاحظة الإغلاق:":"Closing note:","➕ متابعة / إغلاق":"➕ Follow-up / close","اسم موظف الجودة":"Quality officer name","ملاحظة المتابعة":"Follow-up note",
 "➕ تسجيل متابعة":"➕ Log follow-up","✅ إغلاق وحل":"✅ Close & resolve","↩️ إعادة فتح":"↩️ Reopen","➕ إضافة حالة / مهمة يدوية":"➕ Add a manual case / task","✏️ تعديل الحالة":"✏️ Edit case","العنوان":"Title","— بدون مزرعة":"— No farm",
 "⚠️ اكتب ملاحظة المتابعة":"⚠️ Write a follow-up note","✅ تم إغلاق الحالة":"✅ Case closed","✅ تم تسجيل المتابعة":"✅ Follow-up logged","✅ تمت إعادة الفتح":"✅ Reopened","⚠️ تم رصد انحراف جودة — راجع قسم الجودة":"⚠️ A quality deviation was detected — check the Quality section",
@@ -121,11 +126,13 @@ function loginUI() {
   $("#go").onclick = async () => { const {error} = await sb.auth.signInWithPassword({email: $("#em").value, password: $("#pw").value}); error ? $("#er").textContent = ({"Invalid login credentials": "البريد غير مسجل أو كلمة المرور خاطئة", "Email not confirmed": "الحساب غير مؤكد: فعّل Confirm user من Supabase"})[error.message] || error.message : start(); };
 }
 async function start(sel) {
+  await loadMe();
+  if (!ME.legacy && !ME.active) { app.innerHTML = `<div id="login" class="card">${langBtn("justify-self:end")}<h3>لا توجد صلاحيات لحسابك</h3><p class="k">${esc(ME.email)}</p><p>تواصل مع المسؤول لتفعيل الحساب ومنحه دوراً.</p><button onclick="sb.auth.signOut().then(loginUI)">خروج</button></div>`; return; }
   const {data} = await sb.from("cycles").select("id,farm_id,cycle_no,start_date,farms(name)").order("start_date", {ascending: false});
   await loadFarms(); await loadCodes(); cycles = data || []; cur = sel || cycles[0]?.id; if (!cycles.length) tab = "setup";
-  app.innerHTML = `<header><h1>🐔 شركة دواجن الدوحة</h1><select id="cy">${cycles.map(c => `<option value="${c.id}">${c.farms.name} – دورة ${c.cycle_no}</option>`).join("")}</select>${langBtn("color:#fff;border-color:#fff")}<button class="ghost" style="color:#fff;border-color:#fff" onclick="sb.auth.signOut().then(loginUI)">خروج</button></header><main id="m"></main>
-  <nav>${[["dash","اللوحة"],["farms","حالة المزارع"],["entry","إدخال يومي"],["rec","علف/صحة/مخزون"],["vet","الرعاية الصحية"],["lab","المعمل"],["bio","الأمن الحيوي"],["maint","الصيانة"],["quality","الجودة"],["rep","التقارير"],["setup","الدورات"]].map(([t, l]) => `<button data-t="${t}" title="${l}"><b class="ic"><svg viewBox="0 0 24 24">${ICONS[t]}</svg><i class="bdg" id="bdg-${t}"></i></b><span>${l}</span></button>`).join("")}</nav>`;
-  $("#cy").onchange = e => { cur = e.target.value; load(); };
+  app.innerHTML = `<header><h1>🐔 شركة دواجن الدوحة</h1><select id="cy">${cycles.map(c => `<option value="${c.id}">${c.farms.name} – دورة ${c.cycle_no}</option>`).join("")}</select>${langBtn("color:#fff;border-color:#fff")}<button class="ghost" style="color:#fff;border-color:#fff" title="${esc(ME.email + " — " + (ME.role || ""))}" onclick="sb.auth.signOut().then(loginUI)">خروج</button></header><main id="m"></main>
+  <nav>${TABS.filter(([t]) => can(t)).map(([t, l]) => `<button data-t="${t}" title="${l}"><b class="ic"><svg viewBox="0 0 24 24">${ICONS[t]}</svg><i class="bdg" id="bdg-${t}"></i></b><span>${l}</span></button>`).join("")}</nav>`;
+  $("#cy").onchange = e => { cur = e.target.value; load(); }; new MutationObserver(applyRO).observe($("#m"), {childList: true, subtree: true});
   document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.t; pf = ""; render(); });
   $("#cy").value = cur || ""; load();
 }
@@ -135,9 +142,10 @@ async function load() {
   houses = h.data || []; sum = (s.data || []).map(r => ({...r, fcr: r.weight_kg ? r.feed_kg / ((r.chicks - r.mortality) * r.weight_kg) : null})); render();
 }
 function render() {
+  if (!can(tab)) { const f = TABS.find(([t]) => can(t)); if (f) tab = f[0]; }
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t == tab));
-  if (!houses.length && !["setup", "vet", "lab", "farms", "bio", "maint", "quality"].includes(tab)) return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
-  ({dash, farms, entry, rec, vet, lab, bio, maint, quality, rep, setup})[tab](); updateBadge();
+  if (!houses.length && !["setup", "vet", "lab", "farms", "bio", "maint", "quality", "settings"].includes(tab)) return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
+  ({dash, farms, entry, rec, vet, lab, bio, maint, quality, rep, setup, settings})[tab](); updateBadge(); applyRO();
 }
 const T = f => sum.reduce((a, r) => a + (+r[f] || 0), 0);
 const niceMax = m => { const p = 10 ** Math.floor(Math.log10(m)), f = m / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; };
@@ -174,7 +182,7 @@ async function dash() {
 }
 let entryDate = "";
 async function entry() {
-  $("#m").innerHTML = `<div class="row"><b>التاريخ:</b><input type="date" id="dt" value="${entryDate || tdy()}"><button id="sv">💾 حفظ الكل</button></div><div class="hs" id="hs"></div>`;
+  $("#m").innerHTML = `<div class="row"><b>التاريخ:</b><input type="date" id="dt" data-keep="1" value="${entryDate || tdy()}"><button id="sv">💾 حفظ الكل</button></div><div class="hs" id="hs"></div>`;
   const fill = async () => {
     const d = $("#dt").value, {data} = await sb.from("daily_records").select("*").eq("rec_date", d).in("house_id", houses.map(h => h.id));
     const m = Object.fromEntries((data || []).map(r => [r.house_id, r]));
@@ -204,7 +212,7 @@ function rep() {
   body.push(["الإجمالي", n(T("chicks")), n(T("mortality")), n(T("mortality") / T("chicks") * 100, 2), n(100 - T("mortality") / T("chicks") * 100, 2), n(T("sold")), n(T("feed_kg")), "", "", ""]);
   $("#m").innerHTML = `<div class="row"><button id="csv">⬇️ تصدير CSV</button><button class="ghost" onclick="print()">🖨️ طباعة / PDF</button></div><h2>ملخص الدورة (يعادل ورقة Preview)</h2>
   <div class="card tw"><table><tr>${hd.map(h => `<th>${h}</th>`).join("")}</tr>${body.map(r => `<tr>${r.map((c, i) => `<td class="${i == 3 && parseFloat(c) > 5 ? "bad" : ""}">${c}</td>`).join("")}</tr>`).join("")}</table></div>
-  <h2>السجل اليومي لعنبر</h2><div class="row"><select id="hh">${houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join("")}</select></div><div class="card tw" id="dl"></div>`;
+  <h2>السجل اليومي لعنبر</h2><div class="row"><select id="hh" data-keep="1">${houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join("")}</select></div><div class="card tw" id="dl"></div>`;
   $("#csv").onclick = () => { const b = new Blob(["\ufeff" + [hd, ...body].map(r => r.map(c => '"' + (EN ? tr(String(c)) : c) + '"').join(",")).join("\n")], {type: "text/csv"}), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "cycle-report.csv"; a.click(); };
   const daily = async () => { const {data} = await sb.from("daily_records").select("*").eq("house_id", $("#hh").value).order("rec_date"); let cum = 0;
     $("#dl").innerHTML = `<table><tr><th>التاريخ</th><th>العمر</th><th>النفوق</th><th>التراكمي</th><th>العلف</th><th>الوزن جم</th><th>المباع</th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.age}</td><td style="${mcol(r.mortality)}">${r.mortality}</td><td>${cum += r.mortality}</td><td>${n(r.feed_kg)}</td><td>${n(r.avg_weight_g)}</td><td>${r.sold}</td></tr>`).join("")}</table>`; };
@@ -284,6 +292,7 @@ const lbl = (l, c) => (l.find(x => x[0] == c) || [0, c || ""])[1], L_ = x => EN 
 const esc = x => String(x ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 let vsub = "new", vrows = [];
 async function vet() {
+  if (!can("vet", "full")) vsub = "list";
   const tabs = `<div class="row np">${[["new", "➕ زيارة جديدة"], ["list", "📋 تقرير الزيارات"]].map(([k, l]) => `<button class="${vsub == k ? "" : "ghost"}" onclick="vsub='${k}';render()">${l}</button>`).join("")}</div>`;
   const [{data: fm}, {data: cy}] = await Promise.all([sb.from("farms").select("id,name").order("name"), sb.from("cycles").select("id,farm_id,cycle_no,start_date").order("start_date", {ascending: false})]);
   const farms = fm || [], cys = cy || [], fo = farms.map(f => `<option value="${f.id}">${esc(f.name)}</option>`).join(""), fname = id => (farms.find(f => f.id == id) || {}).name || "";
@@ -379,7 +388,7 @@ const lcard = t => `<div class="card" data-lt="${t.id}" data-pdf="${t.pdf_path |
   <label>تاريخ الفحص</label><input type="date" data-f="test_date" value="${t.test_date || ""}"><label>تاريخ النتيجة</label><input type="date" data-f="result_date" value="${t.result_date || ""}">
   <label>التقييم</label><select data-f="outcome">${po(OUT).replace(`value="${t.outcome || ""}"`, `value="${t.outcome || ""}" selected`)}</select>
   <label>النتيجة</label><textarea data-f="result" rows="2">${esc(t.result)}</textarea><label>ملاحظات المعمل</label><textarea data-f="lab_notes" rows="2">${esc(t.lab_notes)}</textarea>
-  <label>ملف النتيجة (PDF)</label><input type="file" accept="application/pdf" data-file>${t.pdf_path ? `<div class="row" style="margin:6px 0"><button type="button" class="ghost" onclick="openPdf('${t.pdf_path}')">📎 عرض الملف</button><button type="button" class="ghost" onclick="rmPdf('${t.id}','${t.pdf_path}')">🗑 إزالة الملف</button></div>` : ""}<div class="row" style="margin:8px 0 0"><button onclick="saveLab(this)">💾 حفظ النتيجة</button></div></div>`;
+  <label>ملف النتيجة (PDF)</label><input type="file" accept="application/pdf" data-file>${t.pdf_path ? `<div class="row" style="margin:6px 0"><button type="button" class="ghost" data-keep="1" onclick="openPdf('${t.pdf_path}')">📎 عرض الملف</button><button type="button" class="ghost" onclick="rmPdf('${t.id}','${t.pdf_path}')">🗑 إزالة الملف</button></div>` : ""}<div class="row" style="margin:8px 0 0"><button onclick="saveLab(this)">💾 حفظ النتيجة</button></div></div>`;
 async function saveLab(b) {
   const el = b.closest("[data-lt]"), o = {}; el.querySelectorAll("[data-f]").forEach(i => o[i.dataset.f] = i.value.trim() || null);
   if (o.lab_doctor) localStorage.labName = o.lab_doctor;
@@ -402,6 +411,7 @@ async function rmPdf(id, path) {
   const {error} = await sb.from("lab_tests").update({pdf_path: null}).eq("id", id); if (error) return alert("❌ " + error.message); render();
 }
 async function lab() {
+  if (!can("lab", "full") && lsub == "sched") lsub = "tests";
   const tabs = `<div class="row np">${[["tests", "📥 طلبات الفحص"], ["sched", "🗓️ الجدولة والبروتوكول"], ["lrep", "📋 تقرير المعمل"]].map(([k, l]) => `<button class="${lsub == k ? "" : "ghost"}" onclick="lsub='${k}';render()">${l}</button>`).join("")}</div>`;
   const {data: cy} = await sb.from("cycles").select("id,farm_id,cycle_no,start_date").order("start_date", {ascending: false}), cys = cy || [], fname = id => (FARMS.find(f => f.id == id) || {}).name || "";
   const cyo = fid => cys.filter(c => !fid || c.farm_id == fid).map(c => `<option value="${c.id}">${esc(fname(c.farm_id))} – دورة ${c.cycle_no}</option>`).join("");
@@ -507,7 +517,7 @@ async function farms() {
     ${r.cyc ? `<div class="k" style="margin-top:6px">دورة ${r.cyc.cycle_no}${r.H.length ? ` · <span>البيوت:</span> ${r.H.length}` : ""}</div>` : ""}
     ${r.H.length && !r.task ? `<div style="margin-top:8px"><span class="k">عمر المزرعة (أكبر عنبر):</span> <b>${Math.max(r.maxAge, 0)}</b> <span>يوم</span></div><div class="k"><span>المتبقي:</span> ${n(r.rem)}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${r.H.map((h, i) => `<span class="k" style="border:1px solid var(--bd);border-radius:8px;padding:1px 6px">${h.no}: ${Math.max(r.ages[i], 0)}</span>`).join("")}</div>` : ""}
     ${r.task ? `<div class="k" style="margin-top:8px"><span>التقدم:</span> <b>${r.pct}%</b></div><div class="pbar"><b style="width:${r.pct}%"></b></div>` : ""}
-    ${r.st == "finished" ? `<div class="row" style="margin:10px 0 0"><button onclick="bioFrom('${r.f.id}')">🛡 فتح مهمة تجهيز</button></div>` : ""}</div>`; };
+    ${r.st == "finished" && can("bio", "full") ? `<div class="row" style="margin:10px 0 0"><button onclick="bioFrom('${r.f.id}')">🛡 فتح مهمة تجهيز</button></div>` : ""}</div>`; };
   const L = rows.filter(r => !fsf || r.st == fsf);
   $("#m").innerHTML = `<div class="grid">${Object.entries(FST).map(([k, [l, c]]) => `<div class="card" style="border-top:4px solid ${c};cursor:pointer" onclick="fsf='${k}';render()"><div class="k">${l}</div><div class="v">${rows.filter(r => r.st == k).length}</div></div>`).join("")}</div>
   <div class="row" style="margin:12px 0"><span class="k">التسويق يبدأ بعد عمر 24 يوم من التسكين</span>${fsf ? `<button class="ghost" data-nolock="1" onclick="fsf='';render()">✖ كل الحالات</button>` : ""}</div>
@@ -717,7 +727,7 @@ async function quality() {
     ${auto ? `<div style="margin:6px 0"><span>${r.rule == "mortality" ? "النافق:" : "الوزن (جم):"}</span> <b class="bad">${n(r.value)}</b> <span class="k">(<span>الحد:</span> ${n(r.threshold)})</span></div><div class="k"><span>العمر:</span> ${r.age ?? ""} · <span>المصدر:</span> ${esc(r.chick_source)} · ${r.rec_date || ""}</div>` : `<div style="margin:6px 0;white-space:pre-wrap">${esc(r.description)}</div>${r.assigned_to ? `<div class="k"><span>المسؤول عن التنفيذ:</span> ${esc(r.assigned_to)}</div>` : ""}${r.due_date ? `<div class="k"><span>تاريخ الاستحقاق:</span> ${r.due_date}</div>` : ""}`}
     ${F.length ? `<details style="margin-top:6px"><summary class="k" style="cursor:pointer"><span>سجل المتابعة</span> (${F.length})</summary>${F.map(f => `<div class="k" style="margin:4px 0">${f.created_at.slice(0, 10)} · <b>${esc(f.by_name)}</b>: ${esc(f.note)}</div>`).join("")}</details>` : ""}
     ${cl && r.closing_note ? `<div class="k" style="margin-top:6px"><span>ملاحظة الإغلاق:</span> ${esc(r.closing_note)}</div>` : ""}
-    ${cl ? `<div class="row" style="margin:8px 0 0"><button type="button" class="ghost" onclick="qReopen('${r.id}')">↩️ إعادة فتح</button>` : `<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600">➕ متابعة / إغلاق</summary><div class="hs" style="margin-top:6px"><div><label>اسم موظف الجودة</label><input id="qb-${r.id}" value="${esc(localStorage.qName || "")}"></div><div><label>ملاحظة المتابعة</label><textarea id="qn-${r.id}" rows="2"></textarea></div></div><div class="row" style="margin:8px 0"><button type="button" onclick="qFollow('${r.id}')">➕ تسجيل متابعة</button><button type="button" class="ghost" onclick="qFollow('${r.id}',1)">✅ إغلاق وحل</button></div></details><div class="row" style="margin:4px 0 0">`}
+    ${cl ? `<div class="row" style="margin:8px 0 0"><button type="button" class="ghost" onclick="qReopen('${r.id}')">↩️ إعادة فتح</button>` : `<details data-form="1" style="margin-top:8px"><summary style="cursor:pointer;font-weight:600">➕ متابعة / إغلاق</summary><div class="hs" style="margin-top:6px"><div><label>اسم موظف الجودة</label><input id="qb-${r.id}" value="${esc(localStorage.qName || "")}"></div><div><label>ملاحظة المتابعة</label><textarea id="qn-${r.id}" rows="2"></textarea></div></div><div class="row" style="margin:8px 0"><button type="button" onclick="qFollow('${r.id}')">➕ تسجيل متابعة</button><button type="button" class="ghost" onclick="qFollow('${r.id}',1)">✅ إغلاق وحل</button></div></details><div class="row" style="margin:4px 0 0">`}
     ${auto ? "" : `<button type="button" class="ghost" onclick="qEd('${r.id}')">✏️</button>`}<button type="button" class="ghost" onclick="del('quality_issues','${r.id}')">🗑</button></div></div>`; };
   const run = async () => {
     let q = sb.from("quality_issues").select("*,farms(name),cycles(cycle_no),houses(no),quality_followups(id,note,by_name,created_at)").eq("section", qsec).limit(300); if ($("#qf1").value) q = q.eq("farm_id", $("#qf1").value); if ($("#qf2").value) q = q.eq("status", $("#qf2").value);
@@ -725,6 +735,75 @@ async function quality() {
     const L = (data || []).sort((a, b) => rk[a.status] - rk[b.status] || b.issue_no - a.issue_no); L.forEach(r => QC[r.id] = r); $("#ql").innerHTML = L.length ? L.map(card).join("") : `<div class="card">لا توجد حالات مطابقة</div>`;
   };
   ["qf1", "qf2"].forEach(i => $("#" + i).onchange = run); run();
+}
+
+// ===== الإعدادات والصلاحيات =====
+ICONS.settings = '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>';
+const TABS = [["dash", "اللوحة"], ["farms", "حالة المزارع"], ["entry", "إدخال يومي"], ["rec", "علف/صحة/مخزون"], ["vet", "الرعاية الصحية"], ["lab", "المعمل"], ["bio", "الأمن الحيوي"], ["maint", "الصيانة"], ["quality", "الجودة"], ["rep", "التقارير"], ["setup", "الدورات"], ["settings", "الإعدادات"]];
+let ME = null, ssub = "users", srole = "";
+const can = (t, need = "view") => !!ME && (!!ME.legacy || (!!ME.tabs[t] && (need == "view" || ME.tabs[t] == "full")));
+async function loadMe() {
+  const {data: {session}} = await sb.auth.getSession(), uid = session ? session.user.id : "", email = session ? session.user.email : "";
+  const {data: u, error} = await sb.from("app_users").select("user_id,role_id,active,app_roles(name)").eq("user_id", uid).maybeSingle();
+  if (error) { ME = {legacy: true, email, uid, tabs: {}, active: true, role: ""}; return; }
+  ME = {email, uid, role: u && u.app_roles ? u.app_roles.name : "", role_id: u ? u.role_id : null, active: !!(u && u.active && u.role_id), tabs: {}};
+  if (ME.active) { const {data} = await sb.from("role_tabs").select("tab,level").eq("role_id", u.role_id); (data || []).forEach(r => ME.tabs[r.tab] = r.level); }
+}
+// وضع القراءة فقط: يقفل الإدخال ويخفي أزرار التغيير ويُبقي التصفية والتصدير والطباعة
+const KEEP_ID = ["fa", "fx", "fp", "ra", "rx", "rp", "xa", "xx", "xp", "csv"];
+const keepBtn = (oc, id, keep) => !!keep || KEEP_ID.includes(id) || (/^(sub|vsub|lsub|msub|qsec|fsf|ssub|print\()/.test(oc) && !/(vsub='new'|lsub='sched')/.test(oc));
+function applyRO() {
+  const m = document.getElementById("m"); if (!m || !ME) return;
+  if (can(tab, "full")) return;
+  m.querySelectorAll("input,select,textarea").forEach(e => { if (!e.closest(".np") && !e.dataset.keep) e.disabled = true; });
+  m.querySelectorAll("button").forEach(b => { if (!keepBtn(b.getAttribute("onclick") || "", b.id, b.dataset.keep)) b.style.display = "none"; });
+  m.querySelectorAll("details.card,details[data-form]").forEach(d => d.style.display = "none");
+}
+async function uSave(b) {
+  const c = b.closest("[data-u]"), o = {}; c.querySelectorAll("[data-f]").forEach(i => o[i.dataset.f] = i.type == "checkbox" ? i.checked : (i.value.trim() || null));
+  if (c.dataset.u == ME.uid && !confirm("هذا حسابك — قد يفقد التغيير صلاحيتك. هل تتابع؟")) return;
+  const {error} = await sb.from("app_users").update(o).eq("user_id", c.dataset.u); if (error) return toast("❌ " + error.message, 1); toast("✅ تم حفظ الصلاحيات"); await loadMe(); render();
+}
+async function uRevoke(b) {
+  const c = b.closest("[data-u]"); if (!confirm(c.dataset.u == ME.uid ? "هذا حسابك — قد يفقد التغيير صلاحيتك. هل تتابع؟" : "إلغاء صلاحية هذا المستخدم؟")) return;
+  const {error} = await sb.from("app_users").update({role_id: null, active: false}).eq("user_id", c.dataset.u); if (error) return toast("❌ " + error.message, 1); toast("✅ تم حفظ الصلاحيات"); await loadMe(); render();
+}
+async function roleNew() {
+  const nm = document.getElementById("rn").value.trim(); if (!nm) return toast("⚠️ أدخل اسم الدور", 1);
+  const {data, error} = await sb.from("app_roles").insert({code: "c" + Date.now(), name: nm, sort: 1000}).select("id").single(); if (error) return toast("❌ " + error.message, 1); srole = data.id; toast("✅ تم الحفظ"); render();
+}
+async function roleDel(id) { if (!confirm("حذف الدور؟ سيفقد المستخدمون المرتبطون به صلاحياتهم.")) return; const {error} = await sb.from("app_roles").delete().eq("id", id); if (error) return toast("❌ " + error.message, 1); srole = ""; toast("🗑 تم الحذف"); await loadMe(); render(); }
+async function roleSave(id) {
+  const m = document.getElementById("m"), notes = document.getElementById("rd").value.trim() || null, T_ = [...m.querySelectorAll("[data-tab]")].filter(x => x.value).map(x => ({role_id: id, tab: x.dataset.tab, level: x.value})), F_ = [...m.querySelectorAll("[data-farm]")].filter(x => x.checked).map(x => ({role_id: id, farm_id: x.dataset.farm}));
+  if (id == ME.role_id && !T_.some(x => x.tab == "settings" && x.level == "full") && !confirm("هذا حسابك — قد يفقد التغيير صلاحيتك. هل تتابع؟")) return;
+  const st = async q => { const r = await q; if (r.error) { toast("❌ " + r.error.message, 1); return false; } return true; };
+  if (!await st(sb.from("app_roles").update({notes}).eq("id", id)) || !await st(sb.from("role_tabs").delete().eq("role_id", id)) || (T_.length && !await st(sb.from("role_tabs").insert(T_))) || !await st(sb.from("role_farms").delete().eq("role_id", id)) || (F_.length && !await st(sb.from("role_farms").insert(F_)))) return;
+  toast("✅ تم حفظ الصلاحيات"); await loadMe(); render();
+}
+async function settings() {
+  const tabsRow = `<div class="row np">${[["users", "👥 المستخدمون"], ["roles", "🔑 الأدوار والصلاحيات"], ["matrix", "📋 ملخص الصلاحيات"]].map(([k, l]) => `<button class="${ssub == k ? "" : "ghost"}" onclick="ssub='${k}';render()">${l}</button>`).join("")}</div>`;
+  const [{data: ro, error}, {data: rt}, {data: rf}] = await Promise.all([sb.from("app_roles").select("*").order("sort"), sb.from("role_tabs").select("*"), sb.from("role_farms").select("role_id,farm_id")]);
+  if (error) return $("#m").innerHTML = tabsRow + `<div class="card bad">${esc(error.message)}</div>`;
+  const R = ro || [], RT = rt || [], RF = rf || [], fnm = id => (FARMS.find(f => f.id == id) || {}).name || "";
+  if (ssub == "users") {
+    const {data: us} = await sb.from("app_users").select("*").order("email");
+    $("#m").innerHTML = tabsRow + `<div class="card k">ℹ️ لإضافة مستخدم جديد: افتح Supabase ثم Authentication ثم Users ثم Add user. يظهر هنا تلقائياً، ثم امنحه دوراً.</div><div class="hs" style="margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${(us || []).map(u => `<div class="card" data-u="${u.user_id}"><b>${esc(u.email)}</b> ${u.user_id == ME.uid ? `<span class="k">(حسابك)</span>` : ""}
+      <label>الاسم</label><input data-f="full_name" value="${esc(u.full_name || "")}"><label>الدور (الوظيفة)</label><select data-f="role_id"><option value="">— بدون صلاحية</option>${R.map(r => `<option value="${r.id}" ${r.id == u.role_id ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select>
+      <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-f="active" ${u.active ? "checked" : ""} style="width:auto"><span>فعّال</span></label><div class="row" style="margin:8px 0 0"><button type="button" onclick="uSave(this)">💾 حفظ</button><button type="button" class="ghost" onclick="uRevoke(this)">🚫 إلغاء الصلاحية</button></div></div>`).join("")}</div>`;
+  } else if (ssub == "roles") {
+    const r0 = R.find(r => r.id == srole) || R[0]; srole = r0 ? r0.id : "";
+    const lv = Object.fromEntries(RT.filter(x => x.role_id == srole).map(x => [x.tab, x.level])), fs = new Set(RF.filter(x => x.role_id == srole).map(x => x.farm_id));
+    $("#m").innerHTML = tabsRow + `<div class="card hs"><div><label>الدور (الوظيفة)</label><select id="rs">${R.map(r => `<option value="${r.id}" ${r.id == srole ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select></div><div><label>➕ دور جديد</label><div style="display:flex;gap:6px"><input id="rn" placeholder="اسم الدور" style="flex:1"><button type="button" onclick="roleNew()">➕</button></div></div></div>
+    ${r0 ? `<div class="card" style="margin-top:12px"><label class="k">وصف الدور</label><textarea id="rd" rows="2">${esc(r0.notes)}</textarea>
+    <div class="tw"><table style="min-width:0"><tr><th>التبويب</th><th>مستوى الصلاحية</th></tr>${TABS.map(([t, l]) => `<tr><td>${l}</td><td><select data-tab="${t}">${[["", "بدون"], ["view", "عرض فقط"], ["full", "كامل"]].map(([v, nm]) => `<option value="${v}" ${(lv[t] || "") == v ? "selected" : ""}>${nm}</option>`).join("")}</select></td></tr>`).join("")}</table></div>
+    <div class="k" style="margin-top:10px">المزارع المسموحة (بدون اختيار = كل المزارع)</div><div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px">${FARMS.map(f => `<label style="display:flex;gap:4px;align-items:center"><input type="checkbox" data-farm="${f.id}" ${fs.has(f.id) ? "checked" : ""}><span>${esc(f.name)}</span></label>`).join("")}</div>
+    <div class="row" style="margin:12px 0 0"><button type="button" onclick="roleSave('${r0.id}')">💾 حفظ الصلاحيات</button><button type="button" class="ghost" onclick="roleDel('${r0.id}')">🗑 حذف الدور</button></div></div>` : ""}`;
+    $("#rs").onchange = e => { srole = e.target.value; render(); };
+  } else {
+    const L = {full: "✔", view: "👁"};
+    $("#m").innerHTML = tabsRow + `<div class="row np"><button class="ghost" onclick="print()">🖨️ طباعة</button></div><div class="card tw"><table><tr><th>الدور</th>${TABS.map(([t, l]) => `<th>${l}</th>`).join("")}<th>المزارع</th></tr>${R.map(r => { const lv = Object.fromEntries(RT.filter(x => x.role_id == r.id).map(x => [x.tab, x.level])), fs = RF.filter(x => x.role_id == r.id).map(x => fnm(x.farm_id)).join(", ");
+      return `<tr><td style="text-align:start">${esc(r.name)}</td>${TABS.map(([t]) => `<td>${L[lv[t]] || "–"}</td>`).join("")}<td>${fs ? esc(fs) : "كل المزارع"}</td></tr>`; }).join("")}</table></div>`;
+  }
 }
 </script>
 </body>
