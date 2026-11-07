@@ -69,7 +69,10 @@ const D = {"🐔 شركة دواجن الدوحة":"🐔 Addoha Poultry Company"
 "كل المزارع":"All farms","كل الدورات":"All cycles","من تاريخ":"From date","إلى تاريخ":"To date","اسم الطبيب":"Veterinarian","الكل":"All","مطلوب":"Required","غير مطلوب":"Not required","فحص معملي":"Lab test",
 "🔍 عرض":"🔍 Show","📗 تصدير Excel":"📗 Export Excel","📕 تصدير PDF":"📕 Export PDF","زيارة":"visits","سجل عنبر":"house records","لا توجد زيارات مطابقة":"No matching visits","تقرير الزيارات البيطرية":"Veterinary visits report",
 "الطبيب":"Veterinarian","الملاحظات":"Notes","الفحص المعملي":"Lab test","لا توجد بيانات للتصدير":"No data to export","تعذر تحميل مكتبة Excel (تحقق من الإنترنت)":"Could not load the Excel library (check your connection)",
-"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","الإعدادات":"Settings","👥 المستخدمون":"👥 Users","🔑 الأدوار والصلاحيات":"🔑 Roles & permissions","📋 ملخص الصلاحيات":"📋 Permissions summary","الاسم":"Name","الدور (الوظيفة)":"Role (job title)","— بدون صلاحية":"— No access","فعّال":"Active","(حسابك)":"(you)",
+"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","المستودع المركزي":"Central warehouse","📦 الأرصدة":"📦 Balances","⬇️ وارد / صادر":"⬇️ In / Out","🔁 تحويل":"🔁 Transfer","🏭 أرصدة المزارع":"🏭 Farm balances","🧾 الأصناف":"🧾 Items","الكود":"Code","الإجمالي":"Total","الباتشات":"Batches","رقم الباتش":"Batch no.","الباتش":"Batch","الباتش المتاح":"Available batch",
+"تسجيل حركة (وارد / صادر)":"Record a movement (in / out)","تحويل وارد":"Transfer in","تحويل صادر":"Transfer out","أرصدة المزرعة":"Farm balances","⚠️ أدخل رقم الباتش":"⚠️ Enter the batch number","⚠️ الكمية أكبر من الرصيد المتاح":"⚠️ Quantity exceeds the available balance",
+"من":"From","إلى":"To","تحويل صنف":"Transfer an item","💾 تنفيذ التحويل":"💾 Execute transfer","✅ تم التحويل":"✅ Transfer done","⚠️ المصدر والوجهة متطابقان":"⚠️ Source and destination are the same","⚠️ لا يوجد رصيد متاح للتحويل":"⚠️ No balance available to transfer",
+"آخر التحويلات":"Recent transfers","كود الصنف":"Item code","وصف الصنف":"Item description","💾 حفظ الصنف":"💾 Save item","✏️ تعديل صنف":"✏️ Edit item","⚠️ الكود أو الاسم مسجل مسبقاً":"⚠️ The code or name already exists","لا توجد أصناف":"No items","الأصناف":"Items","الإعدادات":"Settings","👥 المستخدمون":"👥 Users","🔑 الأدوار والصلاحيات":"🔑 Roles & permissions","📋 ملخص الصلاحيات":"📋 Permissions summary","الاسم":"Name","الدور (الوظيفة)":"Role (job title)","— بدون صلاحية":"— No access","فعّال":"Active","(حسابك)":"(you)",
 "🚫 إلغاء الصلاحية":"🚫 Revoke access","ℹ️ لإضافة مستخدم جديد: افتح Supabase ثم Authentication ثم Users ثم Add user. يظهر هنا تلقائياً، ثم امنحه دوراً.":"ℹ️ To add a new user: open Supabase, then Authentication, then Users, then Add user. He appears here automatically; then give him a role.",
 "➕ دور جديد":"➕ New role","اسم الدور":"Role name","وصف الدور":"Role description","التبويب":"Tab","مستوى الصلاحية":"Access level","بدون":"None","عرض فقط":"View only","كامل":"Full","المزارع المسموحة (بدون اختيار = كل المزارع)":"Allowed farms (none selected = all farms)",
 "💾 حفظ الصلاحيات":"💾 Save permissions","🗑 حذف الدور":"🗑 Delete role","✅ تم حفظ الصلاحيات":"✅ Permissions saved","كل المزارع":"All farms","🖨️ طباعة":"🖨️ Print","الدور":"Role","المزارع":"Farms",
@@ -127,6 +130,7 @@ function loginUI() {
 }
 async function start(sel) {
   await loadMe();
+  if (!window._aw) { window._aw = 1; sb.auth.onAuthStateChange((e, ses) => { if (ME && ses && ses.user && ses.user.id !== ME.uid) location.reload(); }); }
   if (!ME.legacy && !ME.active) { app.innerHTML = `<div id="login" class="card">${langBtn("justify-self:end")}<h3>لا توجد صلاحيات لحسابك</h3><p class="k">${esc(ME.email)}</p><p>تواصل مع المسؤول لتفعيل الحساب ومنحه دوراً.</p><button onclick="sb.auth.signOut().then(loginUI)">خروج</button></div>`; return; }
   const {data} = await sb.from("cycles").select("id,farm_id,cycle_no,start_date,farms(name)").order("start_date", {ascending: false});
   await loadFarms(); await loadCodes(); cycles = data || []; cur = sel || cycles[0]?.id; if (!cycles.length) tab = "setup";
@@ -144,8 +148,8 @@ async function load() {
 function render() {
   if (!can(tab)) { const f = TABS.find(([t]) => can(t)); if (f) tab = f[0]; }
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t == tab));
-  if (!houses.length && !["setup", "vet", "lab", "farms", "bio", "maint", "quality", "settings"].includes(tab)) return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
-  ({dash, farms, entry, rec, vet, lab, bio, maint, quality, rep, setup, settings})[tab](); updateBadge(); applyRO();
+  if (!houses.length && !["setup", "vet", "lab", "farms", "bio", "maint", "quality", "settings", "warehouse"].includes(tab)) return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
+  ({dash, farms, entry, rec, warehouse, vet, lab, bio, maint, quality, rep, setup, settings})[tab](); updateBadge(); applyRO();
 }
 const T = f => sum.reduce((a, r) => a + (+r[f] || 0), 0);
 const niceMax = m => { const p = 10 ** Math.floor(Math.log10(m)), f = m / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; };
@@ -276,14 +280,7 @@ async function rec() {
       save("health_records", e, e ? mk(ids[0]) : ids.map(mk), {house_id: ids[0], rec_date: $("#d1").value, item: $("#d3").value, qty: +$("#d5").value});
     };
   } else {
-    const [{data: it}, {data: mv}] = await Promise.all([sb.from("stock_items").select("*").order("name"), sb.from("stock_moves").select("*,stock_items(name)").order("move_date", {ascending: false}).limit(15)]);
-    $("#m").innerHTML = tabs + `<h2>حركة مخزون (وارد / صادر)</h2><div class="card hs">${sel("m1", "الصنف", (it || []).map(i => `<option value="${i.id}">${esc(i.name)} (${esc(i.unit)})</option>`).join(""))}${sel("m2", "النوع", `<option value="in">وارد</option><option value="out">صادر</option>`)}${inp("m3", "الكمية", "number")}${inp("m4", "التاريخ", "date", tdy())}${inp("m5", "رقم الفاتورة / المرجع")}</div>
-    <div class="row" style="margin:10px 0"><button id="mv">💾 تسجيل الحركة</button></div>
-    <h2>إضافة صنف جديد</h2><div class="card hs">${inp("i1", "اسم الصنف")}${inp("i2", "الوحدة")}${sel("i3", "التصنيف", opts(["Normal", "Treatment"]))}${inp("i4", "الحد الأدنى للتنبيه", "number")}</div><div class="row" style="margin:10px 0"><button id="ni">➕ إضافة الصنف</button></div>
-    <h2>الأرصدة</h2><div class="card tw" style="max-height:50vh;overflow:auto"><table><tr><th>الصنف</th><th>الوحدة</th><th>الرصيد</th><th>الحد الأدنى</th></tr>${(it || []).map(i => `<tr><td>${esc(i.name)}</td><td>${esc(i.unit)}</td><td class="${i.min_level > 0 && i.balance < i.min_level ? "bad" : ""}">${n(i.balance, 2)}</td><td>${n(i.min_level, 2)}</td></tr>`).join("")}</table></div>
-    <h2>آخر الحركات</h2><div class="card tw"><table><tr><th>التاريخ</th><th>الصنف</th><th>النوع</th><th>الكمية</th><th>المرجع</th><th></th></tr>${(mv || []).map(r => `<tr><td>${r.move_date}</td><td>${esc(r.stock_items.name)}</td><td>${r.kind == "in" ? "وارد" : "صادر"}</td><td>${n(r.qty, 2)}</td><td>${esc(r.ref)}</td>${trash("stock_moves", r.id)}</tr>`).join("")}</table></div>`;
-    $("#mv").onclick = () => { if (!(+$("#m3").value > 0)) return toast("⚠️ أدخل الكمية", 1); const o = {item_id: $("#m1").value, kind: $("#m2").value, qty: +$("#m3").value, move_date: $("#m4").value}; save("stock_moves", null, {...o, ref: $("#m5").value.trim() || null}, o); };
-    $("#ni").onclick = () => { if (!$("#i1").value.trim()) return toast("⚠️ أدخل اسم الصنف", 1); save("stock_items", null, {name: $("#i1").value.trim(), unit: $("#i2").value, category: $("#i3").value, min_level: +$("#i4").value || 0}, {name: $("#i1").value.trim()}); };
+    await stockFarm(tabs);
   }
 }
 const SYM = [["normal", "سليم"], ["respiratory", "أعراض تنفسية"], ["digestive", "أعراض هضمية / إسهال"], ["nervous", "أعراض عصبية"], ["leg", "مشاكل أرجل / عرج"], ["mortality", "نفوق مرتفع"], ["growth", "ضعف نمو"], ["environment", "مشاكل بيئة / تهوية"], ["other", "أخرى"]];
@@ -739,7 +736,7 @@ async function quality() {
 
 // ===== الإعدادات والصلاحيات =====
 ICONS.settings = '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>';
-const TABS = [["dash", "اللوحة"], ["farms", "حالة المزارع"], ["entry", "إدخال يومي"], ["rec", "علف/صحة/مخزون"], ["vet", "الرعاية الصحية"], ["lab", "المعمل"], ["bio", "الأمن الحيوي"], ["maint", "الصيانة"], ["quality", "الجودة"], ["rep", "التقارير"], ["setup", "الدورات"], ["settings", "الإعدادات"]];
+const TABS = [["dash", "اللوحة"], ["farms", "حالة المزارع"], ["entry", "إدخال يومي"], ["rec", "علف/صحة/مخزون"], ["warehouse", "المستودع المركزي"], ["vet", "الرعاية الصحية"], ["lab", "المعمل"], ["bio", "الأمن الحيوي"], ["maint", "الصيانة"], ["quality", "الجودة"], ["rep", "التقارير"], ["setup", "الدورات"], ["settings", "الإعدادات"]];
 let ME = null, ssub = "users", srole = "";
 const can = (t, need = "view") => !!ME && (!!ME.legacy || (!!ME.tabs[t] && (need == "view" || ME.tabs[t] == "full")));
 async function loadMe() {
@@ -751,7 +748,7 @@ async function loadMe() {
 }
 // وضع القراءة فقط: يقفل الإدخال ويخفي أزرار التغيير ويُبقي التصفية والتصدير والطباعة
 const KEEP_ID = ["fa", "fx", "fp", "ra", "rx", "rp", "xa", "xx", "xp", "csv"];
-const keepBtn = (oc, id, keep) => !!keep || KEEP_ID.includes(id) || (/^(sub|vsub|lsub|msub|qsec|fsf|ssub|print\()/.test(oc) && !/(vsub='new'|lsub='sched')/.test(oc));
+const keepBtn = (oc, id, keep) => !!keep || KEEP_ID.includes(id) || (/^(sub|vsub|lsub|msub|qsec|fsf|ssub|wsub|print\()/.test(oc) && !/(vsub='new'|lsub='sched'|wsub='mv'|wsub='xfer')/.test(oc));
 function applyRO() {
   const m = document.getElementById("m"); if (!m || !ME) return;
   if (can(tab, "full")) return;
@@ -803,6 +800,93 @@ async function settings() {
     const L = {full: "✔", view: "👁"};
     $("#m").innerHTML = tabsRow + `<div class="row np"><button class="ghost" onclick="print()">🖨️ طباعة</button></div><div class="card tw"><table><tr><th>الدور</th>${TABS.map(([t, l]) => `<th>${l}</th>`).join("")}<th>المزارع</th></tr>${R.map(r => { const lv = Object.fromEntries(RT.filter(x => x.role_id == r.id).map(x => [x.tab, x.level])), fs = RF.filter(x => x.role_id == r.id).map(x => fnm(x.farm_id)).join(", ");
       return `<tr><td style="text-align:start">${esc(r.name)}</td>${TABS.map(([t]) => `<td>${L[lv[t]] || "–"}</td>`).join("")}<td>${fs ? esc(fs) : "كل المزارع"}</td></tr>`; }).join("")}</table></div>`;
+  }
+}
+
+// ===== المخزون: لكل مزرعة + المستودع المركزي (الصنف: كود + وصف، والكمية: باتش) =====
+ICONS.warehouse = '<path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/>';
+const SKIND = {receipt: "وارد", issue: "صادر", transfer_in: "تحويل وارد", transfer_out: "تحويل صادر"}, IN_ = k => k == "receipt" || k == "transfer_in";
+const itLbl = i => (i.code ? i.code + " — " : "") + (i.name || "") + (i.unit ? " (" + i.unit + ")" : "");
+let wsub = "bal", sed = null, sfarm = "", wfarm = "", ITM = {};
+const itEd = id => { sed = ITM[id]; render(); };
+async function xDel(tid) { if (!confirm("حذف السجل؟")) return; const {error} = await sb.rpc("stock_transfer_delete", {tid}); if (error) return toast("❌ " + error.message, 1); toast("🗑 تم الحذف"); render(); }
+async function stkLoad(farm) {
+  let bq = sb.from("stock_balances").select("item_id,batch,qty"), lq = sb.from("stock_ledger").select("*,stock_items(name,code,unit)").order("move_date", {ascending: false}).order("entry_no", {ascending: false}).limit(30);
+  if (farm) { bq = bq.eq("farm_id", farm); lq = lq.eq("farm_id", farm); } else { bq = bq.is("farm_id", null); lq = lq.is("farm_id", null); }
+  const [{data: it}, {data: bal}, {data: led}] = await Promise.all([sb.from("stock_items").select("*").order("name"), bq, lq]); (it || []).forEach(i => ITM[i.id] = i);
+  return {it: it || [], bal: bal || [], led: led || []};
+}
+function stkTable(it, bal) {
+  const by = {}; bal.forEach(b => (by[b.item_id] = by[b.item_id] || []).push(b));
+  return `<div class="card tw" style="max-height:55vh;overflow:auto"><table><tr><th>الكود</th><th>الصنف</th><th>الوحدة</th><th>الإجمالي</th><th>الحد الأدنى</th><th>الباتشات</th></tr>${it.map(i => { const B = by[i.id] || [], tot = B.reduce((a, b) => a + +b.qty, 0);
+    return `<tr><td>${esc(i.code)}</td><td style="text-align:start">${esc(i.name)}${i.description ? `<div class="k">${esc(i.description)}</div>` : ""}</td><td>${esc(i.unit)}</td><td class="${i.min_level > 0 && tot < i.min_level ? "bad" : ""}">${n(tot, 2)}</td><td>${n(i.min_level, 2)}</td><td style="text-align:start;white-space:normal">${B.map(b => `<span class="k" style="border:1px solid var(--bd);border-radius:8px;padding:1px 6px;margin:2px;display:inline-block">${esc(b.batch || "—")}: ${n(b.qty, 2)}</span>`).join("")}</td></tr>`; }).join("")}</table></div>`;
+}
+const stkMoveForm = it => `<h2>تسجيل حركة (وارد / صادر)</h2><div class="card hs">${sel("k1", "الصنف", it.map(i => `<option value="${i.id}">${esc(itLbl(i))}</option>`).join(""))}${sel("k2", "النوع", `<option value="receipt">وارد</option><option value="issue">صادر</option>`)}
+  <div id="k3w"><label>رقم الباتش</label><input id="k3"></div><div id="k3s" style="display:none"><label>الباتش المتاح</label><select id="k3b"></select></div>${inp("k4", "الكمية", "number")}${inp("k5", "التاريخ", "date", tdy())}${inp("k6", "رقم الفاتورة / المرجع")}</div><div class="row" style="margin:10px 0"><button id="kk">💾 تسجيل الحركة</button></div>`;
+function stkMoveBind(bal, farm) {
+  const fb = () => { $("#k3b").innerHTML = bal.filter(b => b.item_id == $("#k1").value).map(b => `<option value="${esc(b.batch)}">${esc(b.batch || "—")} (${n(b.qty, 2)})</option>`).join(""); }, tg = () => { const o = $("#k2").value == "issue"; $("#k3w").style.display = o ? "none" : ""; $("#k3s").style.display = o ? "" : "none"; };
+  $("#k1").onchange = fb; $("#k2").onchange = tg; fb(); tg();
+  $("#kk").onclick = async () => {
+    const out = $("#k2").value == "issue", batch = out ? $("#k3b").value : $("#k3").value.trim(), q = +$("#k4").value, item = $("#k1").value, ref = $("#k6").value.trim() || null;
+    if (!item) return toast("⚠️ أكمل الحقول المطلوبة", 1); if (!(q > 0)) return toast("⚠️ أدخل الكمية", 1); if (!out && !batch) return toast("⚠️ أدخل رقم الباتش", 1);
+    if (out) { const a = bal.find(b => b.item_id == item && b.batch == batch); if (!a || q > +a.qty) return toast("⚠️ الكمية أكبر من الرصيد المتاح", 1); }
+    const o = {item_id: item, batch, kind: out ? "issue" : "receipt", qty: q, move_date: $("#k5").value}, m = {...o}; if (ref) m.ref = ref;
+    let d = sb.from("stock_ledger").select("id").match(m).limit(1); d = farm ? d.eq("farm_id", farm) : d.is("farm_id", null); if (((await d).data || []).length) return toast("⚠️ هذا السجل مسجل مسبقاً", 1);
+    const {error} = await sb.from("stock_ledger").insert({...o, farm_id: farm || null, ref}); if (error) return toast("❌ " + error.message, 1); toast("✅ تم الحفظ"); render();
+  };
+}
+const stkLedger = (led, canDel) => `<h2>آخر الحركات</h2><div class="card tw"><table><tr><th>التاريخ</th><th>الصنف</th><th>النوع</th><th>الباتش</th><th>الكمية</th><th>المرجع</th><th></th></tr>${led.map(r => `<tr><td>${r.move_date}</td><td style="text-align:start">${esc(itLbl(r.stock_items || {}))}</td><td class="${IN_(r.kind) ? "" : "bad"}">${SKIND[r.kind]}</td><td>${esc(r.batch || "—")}</td><td>${n(r.qty, 2)}</td><td>${esc(r.ref)}</td>${r.transfer_id ? (canDel ? `<td><button class="ghost" onclick="xDel('${r.transfer_id}')">🗑</button></td>` : "<td></td>") : `<td><button class="ghost" onclick="del('stock_ledger','${r.id}')">🗑</button></td>`}</tr>`).join("")}</table></div>`;
+const itemForm = e => `<h2>${e ? "✏️ تعديل صنف" : "إضافة صنف جديد"}</h2><div class="card hs">${inp("i1", "كود الصنف", "text", esc(e ? e.code : ""))}${inp("i2", "اسم الصنف", "text", esc(e ? e.name : ""))}${inp("i3", "وصف الصنف", "text", esc(e ? e.description : ""))}${inp("i4", "الوحدة", "text", esc(e ? e.unit : ""))}${sel("i5", "التصنيف", opts(["Normal", "Treatment"]))}${inp("i6", "الحد الأدنى للتنبيه", "number", e ? (e.min_level ?? "") : "")}</div>
+  <div class="row" style="margin:10px 0"><button id="ik">💾 حفظ الصنف</button>${e ? `<button type="button" class="ghost" onclick="sed=null;render()">إلغاء</button>` : ""}</div>`;
+function itemBind(e) {
+  if (e) $("#i5").value = e.category || "Normal";
+  $("#ik").onclick = async () => {
+    const name = $("#i2").value.trim(); if (!name) return toast("⚠️ أدخل اسم الصنف", 1);
+    const o = {code: $("#i1").value.trim() || null, name, description: $("#i3").value.trim() || null, unit: $("#i4").value.trim() || null, category: $("#i5").value, min_level: +$("#i6").value || 0};
+    const r = e ? await sb.from("stock_items").update(o).eq("id", e.id) : await sb.from("stock_items").insert(o);
+    if (r.error) return toast(r.error.code == "23505" ? "⚠️ الكود أو الاسم مسجل مسبقاً" : "❌ " + r.error.message, 1); sed = null; toast(e ? "✅ تم حفظ التعديل" : "✅ تم الحفظ"); render();
+  };
+}
+async function stockFarm(tabs) {
+  if (!sfarm || !FARMS.find(f => f.id == sfarm)) sfarm = (FARMS.find(f => f.id == (cycles.find(c => c.id == cur) || {}).farm_id) || FARMS[0] || {}).id || "";
+  if (!sfarm) return $("#m").innerHTML = tabs + `<div class="card">لا توجد مزارع</div>`;
+  const D = await stkLoad(sfarm);
+  $("#m").innerHTML = tabs + `<div class="card hs np"><div><label>المزرعة</label><select id="sf0">${FARMS.map(f => `<option value="${f.id}" ${f.id == sfarm ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</select></div></div><h2>أرصدة المزرعة</h2>${stkTable(D.it, D.bal)}${stkMoveForm(D.it)}${stkLedger(D.led, false)}${itemForm(null)}`;
+  $("#sf0").onchange = e => { sfarm = e.target.value; render(); }; stkMoveBind(D.bal, sfarm); itemBind(null);
+}
+async function warehouse() {
+  if (!can("warehouse", "full") && ["mv", "xfer"].includes(wsub)) wsub = "bal";
+  const tabs = `<div class="row np">${[["bal", "📦 الأرصدة"], ["mv", "⬇️ وارد / صادر"], ["xfer", "🔁 تحويل"], ["farms", "🏭 أرصدة المزارع"], ["items", "🧾 الأصناف"]].map(([k, l]) => `<button class="${wsub == k ? "" : "ghost"}" onclick="wsub='${k}';sed=null;render()">${l}</button>`).join("")}</div>`;
+  const fname = id => id ? ((FARMS.find(f => f.id == id) || {}).name || "") : "المستودع المركزي";
+  if (wsub == "bal") { const D = await stkLoad(null); $("#m").innerHTML = tabs + stkTable(D.it, D.bal); }
+  else if (wsub == "mv") { const D = await stkLoad(null); $("#m").innerHTML = tabs + stkMoveForm(D.it) + stkLedger(D.led, true); stkMoveBind(D.bal, null); }
+  else if (wsub == "xfer") {
+    const [{data: it}, {data: all}, {data: lg}] = await Promise.all([sb.from("stock_items").select("*").order("name"), sb.from("stock_balances").select("item_id,farm_id,batch,qty"),
+      sb.from("stock_ledger").select("id,move_date,item_id,farm_id,batch,kind,qty,transfer_id,ref,stock_items(name,code,unit)").in("kind", ["transfer_out", "transfer_in"]).order("move_date", {ascending: false}).order("entry_no", {ascending: false}).limit(120)]);
+    const IT = it || [], AL = all || [], T = {}; (lg || []).forEach(r => { (T[r.transfer_id] = T[r.transfer_id] || {})[r.kind == "transfer_out" ? "o" : "i"] = r; }); const TL = Object.values(T).filter(x => x.o && x.i).slice(0, 25);
+    const lo = `<option value="">المستودع المركزي</option>` + FARMS.map(f => `<option value="${f.id}">${esc(f.name)}</option>`).join("");
+    $("#m").innerHTML = tabs + `<h2>تحويل صنف</h2><div class="card hs"><div><label>من</label><select id="x1">${lo}</select></div><div><label>إلى</label><select id="x2">${lo}</select></div>${sel("x3", "الصنف", "")}${sel("x4", "الباتش المتاح", "")}${inp("x5", "الكمية", "number")}${inp("x6", "التاريخ", "date", tdy())}${inp("x7", "رقم الفاتورة / المرجع")}</div><div class="row" style="margin:10px 0"><button id="xk">💾 تنفيذ التحويل</button></div>
+    <h2>آخر التحويلات</h2><div class="card tw"><table><tr><th>التاريخ</th><th>الصنف</th><th>الباتش</th><th>الكمية</th><th>من</th><th>إلى</th><th>المرجع</th><th></th></tr>${TL.map(x => `<tr><td>${x.o.move_date}</td><td style="text-align:start">${esc(itLbl(x.o.stock_items || {}))}</td><td>${esc(x.o.batch || "—")}</td><td>${n(x.o.qty, 2)}</td><td>${esc(fname(x.o.farm_id))}</td><td>${esc(fname(x.i.farm_id))}</td><td>${esc(x.o.ref)}</td><td><button class="ghost" onclick="xDel('${x.o.transfer_id}')">🗑</button></td></tr>`).join("")}</table></div>`;
+    const av = () => AL.filter(b => (b.farm_id || "") == $("#x1").value), fb = () => { $("#x4").innerHTML = av().filter(b => b.item_id == $("#x3").value).map(b => `<option value="${esc(b.batch)}">${esc(b.batch || "—")} (${n(b.qty, 2)})</option>`).join(""); };
+    const fi = () => { $("#x3").innerHTML = [...new Set(av().map(b => b.item_id))].map(id => { const i = IT.find(x => x.id == id); return i ? `<option value="${id}">${esc(itLbl(i))}</option>` : ""; }).join(""); fb(); };
+    $("#x1").onchange = fi; $("#x3").onchange = fb; if (FARMS[0]) $("#x2").value = FARMS[0].id; fi();
+    $("#xk").onclick = async () => {
+      const from = $("#x1").value || null, to = $("#x2").value || null, item = $("#x3").value, batch = $("#x4").value, q = +$("#x5").value, ref = $("#x7").value.trim() || null, d = $("#x6").value;
+      if (from === to) return toast("⚠️ المصدر والوجهة متطابقان", 1); if (!item) return toast("⚠️ لا يوجد رصيد متاح للتحويل", 1); if (!(q > 0)) return toast("⚠️ أدخل الكمية", 1);
+      const a = AL.find(b => b.item_id == item && (b.farm_id || null) == from && b.batch == batch); if (!a || q > +a.qty) return toast("⚠️ الكمية أكبر من الرصيد المتاح", 1);
+      if (TL.some(x => x.o.move_date == d && x.o.item_id == item && x.o.batch == batch && +x.o.qty == q && (x.o.farm_id || null) == from && (x.i.farm_id || null) == to && (x.o.ref || null) == ref)) return toast("⚠️ هذا السجل مسجل مسبقاً", 1);
+      const {error} = await sb.rpc("stock_transfer", {p_item: item, p_batch: batch, p_from: from, p_to: to, p_qty: q, p_date: d, p_ref: ref}); if (error) return toast("❌ " + error.message, 1); toast("✅ تم التحويل"); render();
+    };
+  } else if (wsub == "farms") {
+    const [{data: it}, {data: all}] = await Promise.all([sb.from("stock_items").select("*"), sb.from("stock_balances").select("item_id,farm_id,batch,qty").not("farm_id", "is", null)]), IM = Object.fromEntries((it || []).map(i => [i.id, i]));
+    const L = (all || []).filter(b => !wfarm || b.farm_id == wfarm).sort((a, b) => fname(a.farm_id).localeCompare(fname(b.farm_id)) || itLbl(IM[a.item_id] || {}).localeCompare(itLbl(IM[b.item_id] || {})));
+    $("#m").innerHTML = tabs + `<div class="card hs np"><div><label>المزرعة</label><select id="wf"><option value="">كل المزارع</option>${FARMS.map(f => `<option value="${f.id}" ${f.id == wfarm ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</select></div></div>
+    <div class="card tw" style="margin-top:12px;max-height:60vh;overflow:auto"><table><tr><th>المزرعة</th><th>الصنف</th><th>الباتش</th><th>الكمية</th></tr>${L.map(b => `<tr><td>${esc(fname(b.farm_id))}</td><td style="text-align:start">${esc(itLbl(IM[b.item_id] || {}))}</td><td>${esc(b.batch || "—")}</td><td>${n(b.qty, 2)}</td></tr>`).join("")}</table></div>`;
+    $("#wf").onchange = e => { wfarm = e.target.value; render(); };
+  } else {
+    const {data: it} = await sb.from("stock_items").select("*").order("name"); (it || []).forEach(i => ITM[i.id] = i);
+    $("#m").innerHTML = tabs + itemForm(sed) + `<div class="card tw" style="margin-top:12px"><table><tr><th>الكود</th><th>الصنف</th><th>الوصف</th><th>الوحدة</th><th>الحد الأدنى</th><th></th><th></th></tr>${(it || []).map(i => `<tr><td>${esc(i.code)}</td><td style="text-align:start">${esc(i.name)}</td><td style="text-align:start;white-space:normal">${esc(i.description)}</td><td>${esc(i.unit)}</td><td>${n(i.min_level, 2)}</td><td><button class="ghost" onclick="itEd('${i.id}')">✏️</button></td>${trash("stock_items", i.id)}</tr>`).join("")}</table></div>`;
+    itemBind(sed);
   }
 }
 </script>
