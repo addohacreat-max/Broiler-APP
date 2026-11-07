@@ -69,7 +69,7 @@ const D = {"🐔 شركة دواجن الدوحة":"🐔 Addoha Poultry Company"
 "كل المزارع":"All farms","كل الدورات":"All cycles","من تاريخ":"From date","إلى تاريخ":"To date","اسم الطبيب":"Veterinarian","الكل":"All","مطلوب":"Required","غير مطلوب":"Not required","فحص معملي":"Lab test",
 "🔍 عرض":"🔍 Show","📗 تصدير Excel":"📗 Export Excel","📕 تصدير PDF":"📕 Export PDF","زيارة":"visits","سجل عنبر":"house records","لا توجد زيارات مطابقة":"No matching visits","تقرير الزيارات البيطرية":"Veterinary visits report",
 "الطبيب":"Veterinarian","الملاحظات":"Notes","الفحص المعملي":"Lab test","لا توجد بيانات للتصدير":"No data to export","تعذر تحميل مكتبة Excel (تحقق من الإنترنت)":"Could not load the Excel library (check your connection)",
-"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","المستودع المركزي":"Central warehouse","📦 الأرصدة":"📦 Balances","⬇️ وارد / صادر":"⬇️ In / Out","🔁 تحويل":"🔁 Transfer","🏭 أرصدة المزارع":"🏭 Farm balances","🧾 الأصناف":"🧾 Items","الكود":"Code","الإجمالي":"Total","الباتشات":"Batches","رقم الباتش":"Batch no.","الباتش":"Batch","الباتش المتاح":"Available batch",
+"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","— اختر الصنف":"— Select the item","العمر من":"Age from","العمر إلى":"Age to","الأصناف ذات الرصيد أكبر من صفر فقط":"Only items with balance above zero","سجل الحالة:":"Status history:","تسجيل الفتح":"Opened (time / person)","تسجيل بدء العمل":"Work started (time / person)","تسجيل الحل":"Resolved (time / person)","المستودع المركزي":"Central warehouse","📦 الأرصدة":"📦 Balances","⬇️ وارد / صادر":"⬇️ In / Out","🔁 تحويل":"🔁 Transfer","🏭 أرصدة المزارع":"🏭 Farm balances","🧾 الأصناف":"🧾 Items","الكود":"Code","الإجمالي":"Total","الباتشات":"Batches","رقم الباتش":"Batch no.","الباتش":"Batch","الباتش المتاح":"Available batch",
 "تسجيل حركة (وارد / صادر)":"Record a movement (in / out)","تحويل وارد":"Transfer in","تحويل صادر":"Transfer out","أرصدة المزرعة":"Farm balances","⚠️ أدخل رقم الباتش":"⚠️ Enter the batch number","⚠️ الكمية أكبر من الرصيد المتاح":"⚠️ Quantity exceeds the available balance",
 "من":"From","إلى":"To","تحويل صنف":"Transfer an item","💾 تنفيذ التحويل":"💾 Execute transfer","✅ تم التحويل":"✅ Transfer done","⚠️ المصدر والوجهة متطابقان":"⚠️ Source and destination are the same","⚠️ لا يوجد رصيد متاح للتحويل":"⚠️ No balance available to transfer",
 "آخر التحويلات":"Recent transfers","كود الصنف":"Item code","وصف الصنف":"Item description","💾 حفظ الصنف":"💾 Save item","✏️ تعديل صنف":"✏️ Edit item","⚠️ الكود أو الاسم مسجل مسبقاً":"⚠️ The code or name already exists","لا توجد أصناف":"No items","الأصناف":"Items","الإعدادات":"Settings","👥 المستخدمون":"👥 Users","🔑 الأدوار والصلاحيات":"🔑 Roles & permissions","📋 ملخص الصلاحيات":"📋 Permissions summary","الاسم":"Name","الدور (الوظيفة)":"Role (job title)","— بدون صلاحية":"— No access","فعّال":"Active","(حسابك)":"(you)",
@@ -262,18 +262,21 @@ async function rec() {
   const tabs = `<div class="row np">${[["feed", "🌾 توريد العلف"], ["health", "💊 الصحة والعلاج"], ["stock", "📦 المخزون"]].map(([k, l]) => `<button class="${sub == k ? "" : "ghost"}" onclick="sub='${k}';ed=null;render()">${l}</button>`).join("")}</div>`;
   const c = cycles.find(x => x.id == cur), e = ed && ed.k == sub ? ed.r : null;
   if (sub == "feed") {
-    const {data} = await sb.from("feed_deliveries").select("*").eq("cycle_id", cur).order("rec_date", {ascending: false}).limit(30); (data || []).forEach(r => RC[r.id] = r);
+    const {data} = await fq(); (data || []).forEach(r => RC[r.id] = r);
     $("#m").innerHTML = tabs + `<div class="card hs">${inp("d1", "التاريخ", "date", e ? e.rec_date : tdy())}${inp("d2", "المورد", "text", esc(e ? e.supplier : ""))}${sel("d3", "نوع العلف", opts(["بادئ", "نمو", "ناهي"]))}${inp("d4", "الكمية (كجم)", "number", e ? e.qty_kg : "")}${inp("d5", "عدد التانكات", "number", e ? (e.tanks ?? "") : "")}</div>${btnRow(e ? "💾 حفظ التعديل" : "💾 حفظ التوريدة")}
-    <div class="card tw"><table><tr><th>التاريخ</th><th>المورد</th><th>النوع</th><th>الكمية</th><th>تانكات</th><th></th><th></th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${esc(r.supplier)}</td><td>${r.feed_type || ""}</td><td>${n(r.qty_kg)}</td><td>${r.tanks ?? ""}</td>${edBtn("feed", r.id)}${trash("feed_deliveries", r.id)}</tr>`).join("")}</table></div>`;
+    <div class="card hs np" style="margin:12px 0">${inp("ff1", "من تاريخ", "date", fdF)}${inp("ff2", "إلى تاريخ", "date", fdT)}</div><div class="card tw"><table><tr><th>التاريخ</th><th>المورد</th><th>النوع</th><th>الكمية</th><th>تانكات</th><th></th><th></th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${esc(r.supplier)}</td><td>${r.feed_type || ""}</td><td>${n(r.qty_kg)}</td><td>${r.tanks ?? ""}</td>${edBtn("feed", r.id)}${trash("feed_deliveries", r.id)}</tr>`).join("")}</table></div>`;
     if (e && e.feed_type) $("#d3").value = e.feed_type;
+    $("#ff1").onchange = ev => { fdF = ev.target.value; render(); }; $("#ff2").onchange = ev => { fdT = ev.target.value; render(); };
     $("#ok").onclick = () => { if (!+$("#d4").value) return toast("⚠️ أدخل الكمية", 1); const o = {cycle_id: cur, rec_date: $("#d1").value, supplier: $("#d2").value, feed_type: $("#d3").value, qty_kg: +$("#d4").value}; save("feed_deliveries", e, {...o, tanks: +$("#d5").value || null}, o); };
   } else if (sub == "health") {
-    const [{data}, {data: it}] = await Promise.all([sb.from("health_records").select("*,houses!inner(no,cycle_id)").eq("houses.cycle_id", cur).order("rec_date", {ascending: false}).limit(40), sb.from("stock_items").select("name,unit").order("name")]); (data || []).forEach(r => RC[r.id] = r);
+    const [{data}, {data: it}] = await Promise.all([hq(), sb.from("stock_items").select("name,unit,code").order("name")]); (data || []).forEach(r => RC[r.id] = r);
     $("#m").innerHTML = tabs + `<div class="card hs">${inp("d1", "التاريخ", "date", e ? e.rec_date : tdy())}${sel("d2", "العنبر", (e ? "" : `<option value="all">كل العنابر</option>`) + houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join(""))}
-    <div><label>الصنف (دواء / لقاح / مكمل)</label><input id="d3" list="il" value="${esc(e ? e.item : "")}"><datalist id="il">${(it || []).map(i => `<option value="${esc(i.name)}">`).join("")}</datalist></div>${sel("d4", "الحالة", opts(["Normal", "Treatment"]))}${inp("d5", "الكمية لكل عنبر", "number", e ? e.qty : "")}${inp("d6", "الوحدة", "text", esc(e ? e.unit : ""))}${inp("d7", "ملاحظة", "text", esc(e ? e.note : ""))}</div>${btnRow(e ? "💾 حفظ التعديل" : "💾 حفظ السجل")}
-    <div class="card tw"><table><tr><th>التاريخ</th><th>عنبر</th><th>الصنف</th><th>الكمية</th><th>الحالة</th><th></th><th></th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.houses.no}</td><td>${esc(r.item)}</td><td>${n(r.qty, 2)} ${esc(r.unit)}</td><td>${r.case_type || ""}</td>${edBtn("health", r.id)}${trash("health_records", r.id)}</tr>`).join("")}</table></div>`;
-    if (e) { $("#d2").value = e.house_id; $("#d4").value = e.case_type || "Normal"; }
-    $("#d3").onchange = ev => { const f = (it || []).find(i => i.name == ev.target.value); if (f && !$("#d6").value) $("#d6").value = f.unit || ""; };
+    ${sel("d3", "الصنف (دواء / لقاح / مكمل)", itOpts(it, e ? e.item : ""))}${sel("d4", "الحالة", opts(["Normal", "Treatment"]))}${inp("d5", "الكمية لكل عنبر", "number", e ? e.qty : "")}${inp("d6", "الوحدة", "text", esc(e ? e.unit : ""))}${inp("d7", "ملاحظة", "text", esc(e ? e.note : ""))}</div>${btnRow(e ? "💾 حفظ التعديل" : "💾 حفظ السجل")}
+    <div class="card hs np" style="margin:12px 0">${sel("hf1", "العنبر", `<option value="">كل العنابر</option>` + houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join(""))}${inp("hf2", "العمر من", "number", hA1)}${inp("hf3", "العمر إلى", "number", hA2)}${inp("hf4", "من تاريخ", "date", hD1)}${inp("hf5", "إلى تاريخ", "date", hD2)}</div><div class="card tw"><table><tr><th>التاريخ</th><th>عنبر</th><th>العمر</th><th>الصنف</th><th>الكمية</th><th>الحالة</th><th></th><th></th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.houses.no}</td><td>${r.age ?? ""}</td><td>${esc(r.item)}</td><td>${n(r.qty, 2)} ${esc(r.unit)}</td><td>${r.case_type || ""}</td>${edBtn("health", r.id)}${trash("health_records", r.id)}</tr>`).join("")}</table></div>`;
+    if (e) { $("#d2").value = e.house_id; $("#d4").value = e.case_type || "Normal"; $("#d3").value = e.item; }
+    $("#d3").onchange = ev => { const f = (it || []).find(i => i.name == ev.target.value); if (f) $("#d6").value = f.unit || ""; };
+    $("#hf1").value = hH; $("#hf1").onchange = ev => { hH = ev.target.value; render(); }; $("#hf2").onchange = ev => { hA1 = ev.target.value; render(); }; $("#hf3").onchange = ev => { hA2 = ev.target.value; render(); };
+    $("#hf4").onchange = ev => { hD1 = ev.target.value; render(); }; $("#hf5").onchange = ev => { hD2 = ev.target.value; render(); };
     $("#ok").onclick = () => {
       if (!$("#d3").value || !+$("#d5").value) return toast("⚠️ أدخل الصنف والكمية", 1);
       const ids = e ? [$("#d2").value] : $("#d2").value == "all" ? houses.map(h => h.id) : [$("#d2").value], mk = h => ({house_id: h, rec_date: $("#d1").value, age: ageOf(houses.find(x => x.id == h) || {}, $("#d1").value, c && c.start_date), case_type: $("#d4").value, item: $("#d3").value, unit: $("#d6").value, qty: +$("#d5").value, note: $("#d7").value});
@@ -580,7 +583,7 @@ async function bio() {
 ICONS.maint = '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>';
 const MPRI = [["emergency", "طارئ"], ["normal", "غير طارئ"]], MST = [["open", "مفتوح"], ["in_progress", "جاري العمل عليه"], ["resolved", "تم الحل"]];
 const MTYPE = [["feed_line", "خطوط العلف"], ["water_line", "خطوط المياه"], ["electricity", "الكهرباء"], ["housing", "السكن"], ["ventilation", "التهوية والمراوح"], ["heating", "التدفئة والغاز"], ["cooling", "التبريد (وسادات / رشاشات)"], ["generator", "المولدات والطاقة الاحتياطية"], ["structure", "المباني والأسقف والأبواب"], ["controllers", "أجهزة التحكم والحساسات"], ["vehicle", "المركبات والمعدات"], ["other", "أخرى"]];
-const MH = ["رقم الطلب", "تاريخ الطلب", "المزرعة", "الدورة", "العنبر", "الأولوية", "نوع المشكلة", "الوصف", "الحالة", "المسؤول", "تاريخ الحل", "ملاحظات الحل"];
+const MH = ["رقم الطلب", "تاريخ الطلب", "المزرعة", "الدورة", "العنبر", "الأولوية", "نوع المشكلة", "الوصف", "الحالة", "المسؤول", "تاريخ الحل", "ملاحظات الحل", "تسجيل الفتح", "تسجيل بدء العمل", "تسجيل الحل"];
 const MQ = "id,req_no,farm_id,cycle_id,house_id,priority,issue_type,description,requested_by,request_date,status,assigned_to,resolution_notes,resolved_date,farms(name),cycles(cycle_no),houses(no)";
 const mno = x => "MR-" + String(x).padStart(5, "0");
 let msub = "dash", med = null, MC = {}, mrows = [];
@@ -623,11 +626,11 @@ async function maint() {
     const card = r => `<div class="card" style="border-inline-start:5px solid ${r.priority == "emergency" ? "var(--bad)" : "var(--pri)"}"><div class="vhd" style="margin:0"><b>${mno(r.req_no)}</b>${r.priority == "emergency" ? `<span style="background:var(--bad);color:#fff;border-radius:12px;padding:1px 9px;font-size:12px">${lbl(MPRI, r.priority)}</span>` : `<span class="k">${lbl(MPRI, r.priority)}</span>`}<b>${lbl(MTYPE, r.issue_type)}</b></div>
       <div class="k" style="margin-top:4px">${esc((r.farms || {}).name)}${r.cycles ? ` · دورة ${r.cycles.cycle_no}` : ""}${r.houses ? ` · عنبر ${r.houses.no}` : ""}</div><div style="margin:8px 0;white-space:pre-wrap">${esc(r.description)}</div>
       <div class="k"><span>مقدم الطلب:</span> ${esc(r.requested_by)} · ${r.request_date}</div>${r.assigned_to ? `<div class="k"><span>المسؤول عن التنفيذ:</span> ${esc(r.assigned_to)}</div>` : ""}${r.resolution_notes ? `<div class="k"><span>ملاحظات الحل:</span> ${esc(r.resolution_notes)}</div>` : ""}${r.resolved_date ? `<div class="k"><span>تاريخ الحل:</span> ${r.resolved_date}</div>` : ""}
-      <div class="row" style="margin:8px 0 0"><select onchange="mSt('${r.id}',this.value)">${po(MST).replace(`value="${r.status}"`, `value="${r.status}" selected`)}</select><button type="button" class="ghost" onclick="mEd('${r.id}')">✏️</button><button type="button" class="ghost" onclick="del('maint_requests','${r.id}')">🗑</button></div></div>`;
+      ${mHist(r.id)}<div class="row" style="margin:8px 0 0"><select onchange="mSt('${r.id}',this.value)">${po(MST).replace(`value="${r.status}"`, `value="${r.status}" selected`)}</select><button type="button" class="ghost" onclick="mEd('${r.id}')">✏️</button><button type="button" class="ghost" onclick="del('maint_requests','${r.id}')">🗑</button></div></div>`;
     const run = async () => {
       let q = sb.from("maint_requests").select(MQ).limit(300); if ($("#l1").value) q = q.eq("farm_id", $("#l1").value); if ($("#l2").value) q = q.eq("status", $("#l2").value); if ($("#l3").value) q = q.eq("priority", $("#l3").value);
       const {data, error} = await q; if (error) return $("#ml").innerHTML = `<div class="card bad">${esc(error.message)}</div>`;
-      const L = (data || []).sort((a, b) => (a.status == "resolved") - (b.status == "resolved") || (a.priority == "emergency" ? 0 : 1) - (b.priority == "emergency" ? 0 : 1) || b.req_no - a.req_no); L.forEach(r => MC[r.id] = r);
+      const L = (data || []).sort((a, b) => (a.status == "resolved") - (b.status == "resolved") || (a.priority == "emergency" ? 0 : 1) - (b.priority == "emergency" ? 0 : 1) || b.req_no - a.req_no); L.forEach(r => MC[r.id] = r); await mLoadLog();
       $("#ml").innerHTML = L.length ? L.map(card).join("") : `<div class="card">لا توجد طلبات مطابقة</div>`;
     };
     ["l1", "l2", "l3"].forEach(i => $("#" + i).onchange = run); run();
@@ -638,8 +641,8 @@ async function maint() {
     const run = async () => {
       let q = sb.from("maint_requests").select(MQ).order("req_no", {ascending: false}).limit(1000);
       [["x1", "farm_id"], ["x2", "cycle_id"], ["x3", "status"], ["x4", "priority"], ["x5", "issue_type"]].forEach(([i, f]) => { if ($("#" + i).value) q = q.eq(f, $("#" + i).value); }); if ($("#x6").value) q = q.gte("request_date", $("#x6").value); if ($("#x7").value) q = q.lte("request_date", $("#x7").value);
-      const {data, error} = await q; if (error) return $("#xr").innerHTML = `<span class="bad">${esc(error.message)}</span>`; const L = data || [];
-      mrows = L.map(r => [mno(r.req_no), r.request_date, (r.farms || {}).name || "", (r.cycles || {}).cycle_no || "", (r.houses || {}).no || "", lbl(MPRI, r.priority), lbl(MTYPE, r.issue_type), r.description || "", lbl(MST, r.status), r.assigned_to || "", r.resolved_date || "", r.resolution_notes || ""]);
+      const {data, error} = await q; if (error) return $("#xr").innerHTML = `<span class="bad">${esc(error.message)}</span>`; const L = data || []; await mLoadLog();
+      mrows = L.map(r => [mno(r.req_no), r.request_date, (r.farms || {}).name || "", (r.cycles || {}).cycle_no || "", (r.houses || {}).no || "", lbl(MPRI, r.priority), lbl(MTYPE, r.issue_type), r.description || "", lbl(MST, r.status), r.assigned_to || "", r.resolved_date || "", r.resolution_notes || "", mLast(r.id, "open"), mLast(r.id, "in_progress"), mLast(r.id, "resolved")]);
       $("#xc").innerHTML = `<b>${L.length}</b> <span>طلب</span>`;
       $("#xr").innerHTML = L.length ? `<table><tr>${MH.map(h => `<th>${h}</th>`).join("")}</tr>${mrows.map(r => `<tr>${r.map((c, i) => `<td style="${i == 7 || i == 11 ? "white-space:normal;text-align:start" : ""}">${esc(c)}</td>`).join("")}</tr>`).join("")}</table>` : `<span class="k">لا توجد طلبات مطابقة</span>`;
     };
@@ -647,7 +650,7 @@ async function maint() {
     ["x2", "x3", "x4", "x5", "x6", "x7"].forEach(i => $("#" + i).onchange = run); $("#xa").onclick = run; $("#xp").onclick = () => print();
     $("#xx").onclick = () => {
       if (!mrows.length) return alert("لا توجد بيانات للتصدير"); if (!window.XLSX) return alert("تعذر تحميل مكتبة Excel (تحقق من الإنترنت)");
-      const ws = XLSX.utils.aoa_to_sheet([MH.map(L_), ...mrows.map(r => r.map((c, i) => [5, 6, 8].includes(i) ? L_(c) : c))]); ws["!cols"] = [11, 12, 14, 9, 8, 12, 24, 40, 16, 16, 12, 30].map(w => ({wch: w}));
+      const ws = XLSX.utils.aoa_to_sheet([MH.map(L_), ...mrows.map(r => r.map((c, i) => [5, 6, 8].includes(i) ? L_(c) : c))]); ws["!cols"] = [11, 12, 14, 9, 8, 12, 24, 40, 16, 16, 12, 30, 24, 24, 24].map(w => ({wch: w}));
       const wb = XLSX.utils.book_new(); if (!EN) wb.Workbook = {Views: [{RTL: true}]}; XLSX.utils.book_append_sheet(wb, ws, "Maintenance"); XLSX.writeFile(wb, "maintenance-report-" + tdy() + ".xlsx");
     };
     run();
@@ -807,7 +810,7 @@ async function settings() {
 ICONS.warehouse = '<path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/>';
 const SKIND = {receipt: "وارد", issue: "صادر", transfer_in: "تحويل وارد", transfer_out: "تحويل صادر"}, IN_ = k => k == "receipt" || k == "transfer_in";
 const itLbl = i => (i.code ? i.code + " — " : "") + (i.name || "") + (i.unit ? " (" + i.unit + ")" : "");
-let wsub = "bal", sed = null, sfarm = "", wfarm = "", ITM = {};
+let wsub = "bal", sed = null, sfarm = "", wfarm = "", ITM = {}, posOnly = false;
 const itEd = id => { sed = ITM[id]; render(); };
 async function xDel(tid) { if (!confirm("حذف السجل؟")) return; const {error} = await sb.rpc("stock_transfer_delete", {tid}); if (error) return toast("❌ " + error.message, 1); toast("🗑 تم الحذف"); render(); }
 async function stkLoad(farm) {
@@ -818,6 +821,7 @@ async function stkLoad(farm) {
 }
 function stkTable(it, bal) {
   const by = {}; bal.forEach(b => (by[b.item_id] = by[b.item_id] || []).push(b));
+  if (posOnly) it = it.filter(i => (by[i.id] || []).reduce((a, b) => a + +b.qty, 0) > 0);
   return `<div class="card tw" style="max-height:55vh;overflow:auto"><table><tr><th>الكود</th><th>الصنف</th><th>الوحدة</th><th>الإجمالي</th><th>الحد الأدنى</th><th>الباتشات</th></tr>${it.map(i => { const B = by[i.id] || [], tot = B.reduce((a, b) => a + +b.qty, 0);
     return `<tr><td>${esc(i.code)}</td><td style="text-align:start">${esc(i.name)}${i.description ? `<div class="k">${esc(i.description)}</div>` : ""}</td><td>${esc(i.unit)}</td><td class="${i.min_level > 0 && tot < i.min_level ? "bad" : ""}">${n(tot, 2)}</td><td>${n(i.min_level, 2)}</td><td style="text-align:start;white-space:normal">${B.map(b => `<span class="k" style="border:1px solid var(--bd);border-radius:8px;padding:1px 6px;margin:2px;display:inline-block">${esc(b.batch || "—")}: ${n(b.qty, 2)}</span>`).join("")}</td></tr>`; }).join("")}</table></div>`;
 }
@@ -851,14 +855,14 @@ async function stockFarm(tabs) {
   if (!sfarm || !FARMS.find(f => f.id == sfarm)) sfarm = (FARMS.find(f => f.id == (cycles.find(c => c.id == cur) || {}).farm_id) || FARMS[0] || {}).id || "";
   if (!sfarm) return $("#m").innerHTML = tabs + `<div class="card">لا توجد مزارع</div>`;
   const D = await stkLoad(sfarm);
-  $("#m").innerHTML = tabs + `<div class="card hs np"><div><label>المزرعة</label><select id="sf0">${FARMS.map(f => `<option value="${f.id}" ${f.id == sfarm ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</select></div></div><h2>أرصدة المزرعة</h2>${stkTable(D.it, D.bal)}${stkMoveForm(D.it)}${stkLedger(D.led, false)}${itemForm(null)}`;
-  $("#sf0").onchange = e => { sfarm = e.target.value; render(); }; stkMoveBind(D.bal, sfarm); itemBind(null);
+  $("#m").innerHTML = tabs + `<div class="card hs np"><div><label>المزرعة</label><select id="sf0">${FARMS.map(f => `<option value="${f.id}" ${f.id == sfarm ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</select></div>${posBox()}</div><h2>أرصدة المزرعة</h2>${stkTable(D.it, D.bal)}${stkMoveForm(D.it)}${stkLedger(D.led, false)}${itemForm(null)}`;
+  $("#sf0").onchange = e => { sfarm = e.target.value; render(); }; $("#po").onchange = e => { posOnly = e.target.checked; render(); }; stkMoveBind(D.bal, sfarm); itemBind(null);
 }
 async function warehouse() {
   if (!can("warehouse", "full") && ["mv", "xfer"].includes(wsub)) wsub = "bal";
   const tabs = `<div class="row np">${[["bal", "📦 الأرصدة"], ["mv", "⬇️ وارد / صادر"], ["xfer", "🔁 تحويل"], ["farms", "🏭 أرصدة المزارع"], ["items", "🧾 الأصناف"]].map(([k, l]) => `<button class="${wsub == k ? "" : "ghost"}" onclick="wsub='${k}';sed=null;render()">${l}</button>`).join("")}</div>`;
   const fname = id => id ? ((FARMS.find(f => f.id == id) || {}).name || "") : "المستودع المركزي";
-  if (wsub == "bal") { const D = await stkLoad(null); $("#m").innerHTML = tabs + stkTable(D.it, D.bal); }
+  if (wsub == "bal") { const D = await stkLoad(null); $("#m").innerHTML = tabs + `<div class="card hs np">${posBox()}</div>` + stkTable(D.it, D.bal); $("#po").onchange = e => { posOnly = e.target.checked; render(); }; }
   else if (wsub == "mv") { const D = await stkLoad(null); $("#m").innerHTML = tabs + stkMoveForm(D.it) + stkLedger(D.led, true); stkMoveBind(D.bal, null); }
   else if (wsub == "xfer") {
     const [{data: it}, {data: all}, {data: lg}] = await Promise.all([sb.from("stock_items").select("*").order("name"), sb.from("stock_balances").select("item_id,farm_id,batch,qty"),
@@ -889,6 +893,17 @@ async function warehouse() {
     itemBind(sed);
   }
 }
+
+// ===== فلاتر العلف والصحة + قائمة الصنف + سجل حالة الصيانة =====
+let fdF = "", fdT = "", hH = "", hA1 = "", hA2 = "", hD1 = "", hD2 = "", LG = {};
+const fq = () => { let q = sb.from("feed_deliveries").select("*").eq("cycle_id", cur).order("rec_date", {ascending: false}).limit(200); if (fdF) q = q.gte("rec_date", fdF); if (fdT) q = q.lte("rec_date", fdT); return q; };
+const hq = () => { let q = sb.from("health_records").select("*,houses!inner(no,cycle_id)").eq("houses.cycle_id", cur).order("rec_date", {ascending: false}).limit(200); if (hH) q = q.eq("house_id", hH); if (hA1 !== "") q = q.gte("age", +hA1); if (hA2 !== "") q = q.lte("age", +hA2); if (hD1) q = q.gte("rec_date", hD1); if (hD2) q = q.lte("rec_date", hD2); return q; };
+const itOpts = (it, cur) => `<option value="">— اختر الصنف</option>` + (cur && !(it || []).some(i => i.name == cur) ? `<option value="${esc(cur)}">${esc(cur)}</option>` : "") + (it || []).map(i => `<option value="${esc(i.name)}">${esc(itLbl(i))}</option>`).join("");
+const posBox = () => `<div><label style="display:flex;gap:6px;align-items:center;margin-top:22px"><input type="checkbox" id="po" ${posOnly ? "checked" : ""} style="width:auto"><span>الأصناف ذات الرصيد أكبر من صفر فقط</span></label></div>`;
+const fdt = x => { const d = new Date(x); return d.toLocaleDateString("sv-SE") + " " + d.toLocaleTimeString("en-GB", {hour: "2-digit", minute: "2-digit"}); };
+async function mLoadLog() { const {data} = await sb.from("maint_status_log").select("request_id,status,changed_at,by_name").order("changed_at").limit(10000); LG = {}; (data || []).forEach(x => (LG[x.request_id] = LG[x.request_id] || []).push(x)); }
+const mLast = (id, st) => { const x = (LG[id] || []).filter(l => l.status == st).pop(); return x ? fdt(x.changed_at) + " — " + (x.by_name || "") : ""; };
+const mHist = id => { const L = LG[id] || []; return L.length ? `<div class="k" style="margin-top:6px"><span>سجل الحالة:</span>${L.map(x => `<div style="margin:2px 0"><b>${lbl(MST, x.status)}</b> · ${fdt(x.changed_at)} · ${esc(x.by_name)}</div>`).join("")}</div>` : ""; };
 </script>
 </body>
 </html>
