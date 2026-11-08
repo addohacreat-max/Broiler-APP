@@ -20,7 +20,7 @@ nav{position:fixed;top:56px;bottom:0;inset-inline-start:0;width:210px;background
 nav button{display:flex;align-items:center;gap:12px;background:none;color:var(--mut);border-radius:0;padding:14px 18px;text-align:start;border-inline-start:3px solid transparent}nav button b{font-size:18px}
 nav button.on{color:var(--pri);background:var(--bg);border-inline-start-color:var(--pri)}
 @media(max-width:700px){nav{width:54px}nav button{justify-content:center;padding:14px 0}nav button span{display:none}main{margin-inline-start:54px!important;padding:10px!important}}
-.c2{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}svg{display:block;direction:ltr}.hs select,.hs textarea{width:100%}textarea{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px;resize:vertical}.vhd{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:8px}.pr{display:none}nav button{position:relative}.ic{position:relative}.bdg{position:absolute;top:-6px;inset-inline-end:-9px;background:var(--bad);color:#fff;border-radius:9px;font:700 10px system-ui;padding:1px 5px;font-style:normal}.bdg:empty{display:none}
+.c2{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}svg{display:block;direction:ltr}.hs select,.hs textarea{width:100%}textarea{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px;resize:vertical}.vhd{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:8px}.pr{display:none}@media print{body.po-mode #m>*:not(.po){display:none!important}}nav button{position:relative}.ic{position:relative}.bdg{position:absolute;top:-6px;inset-inline-end:-9px;background:var(--bad);color:#fff;border-radius:9px;font:700 10px system-ui;padding:1px 5px;font-style:normal}.bdg:empty{display:none}
 #toast{position:fixed;top:66px;left:50%;transform:translateX(-50%);background:var(--pri);color:#fff;padding:10px 22px;border-radius:10px;z-index:99;font-weight:600;box-shadow:0 4px 16px #0004;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}#toast.err{background:var(--bad)}
 .stp{display:flex;overflow-x:auto;padding:10px 0 4px}.stp .s{flex:1;min-width:92px;text-align:center;font-size:12px;position:relative}
 .stp .s i{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;margin:0 auto 6px;background:var(--bd);color:var(--tx);font-style:normal;font-weight:700;position:relative;z-index:1}
@@ -69,7 +69,7 @@ const D = {"🐔 شركة دواجن الدوحة":"🐔 Addoha Poultry Company"
 "كل المزارع":"All farms","كل الدورات":"All cycles","من تاريخ":"From date","إلى تاريخ":"To date","اسم الطبيب":"Veterinarian","الكل":"All","مطلوب":"Required","غير مطلوب":"Not required","فحص معملي":"Lab test",
 "🔍 عرض":"🔍 Show","📗 تصدير Excel":"📗 Export Excel","📕 تصدير PDF":"📕 Export PDF","زيارة":"visits","سجل عنبر":"house records","لا توجد زيارات مطابقة":"No matching visits","تقرير الزيارات البيطرية":"Veterinary visits report",
 "الطبيب":"Veterinarian","الملاحظات":"Notes","الفحص المعملي":"Lab test","لا توجد بيانات للتصدير":"No data to export","تعذر تحميل مكتبة Excel (تحقق من الإنترنت)":"Could not load the Excel library (check your connection)",
-"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","— اختر الصنف":"— Select the item","العمر من":"Age from","العمر إلى":"Age to","الأصناف ذات الرصيد أكبر من صفر فقط":"Only items with balance above zero","سجل الحالة:":"Status history:","تسجيل الفتح":"Opened (time / person)","تسجيل بدء العمل":"Work started (time / person)","تسجيل الحل":"Resolved (time / person)","المستودع المركزي":"Central warehouse","📦 الأرصدة":"📦 Balances","⬇️ وارد / صادر":"⬇️ In / Out","🔁 تحويل":"🔁 Transfer","🏭 أرصدة المزارع":"🏭 Farm balances","🧾 الأصناف":"🧾 Items","الكود":"Code","الإجمالي":"Total","الباتشات":"Batches","رقم الباتش":"Batch no.","الباتش":"Batch","الباتش المتاح":"Available batch",
+"في نافذة الطباعة اختر «حفظ بصيغة PDF»":"In the print dialog choose “Save as PDF”","تاريخ الطباعة:":"Printed on:","النسبة الحياتية %":"Livability %","الرصيد المتبقي":"Remaining birds","العلف / طائر (كجم)":"Feed / bird (kg)","متوسط الوزن (كجم)":"Average weight (kg)","الإجمالي / المتوسط":"Total / average","العلف / طائر لكل عنبر (كجم)":"Feed / bird by house (kg)","— اختر الصنف":"— Select the item","العمر من":"Age from","العمر إلى":"Age to","الأصناف ذات الرصيد أكبر من صفر فقط":"Only items with balance above zero","سجل الحالة:":"Status history:","تسجيل الفتح":"Opened (time / person)","تسجيل بدء العمل":"Work started (time / person)","تسجيل الحل":"Resolved (time / person)","المستودع المركزي":"Central warehouse","📦 الأرصدة":"📦 Balances","⬇️ وارد / صادر":"⬇️ In / Out","🔁 تحويل":"🔁 Transfer","🏭 أرصدة المزارع":"🏭 Farm balances","🧾 الأصناف":"🧾 Items","الكود":"Code","الإجمالي":"Total","الباتشات":"Batches","رقم الباتش":"Batch no.","الباتش":"Batch","الباتش المتاح":"Available batch",
 "تسجيل حركة (وارد / صادر)":"Record a movement (in / out)","تحويل وارد":"Transfer in","تحويل صادر":"Transfer out","أرصدة المزرعة":"Farm balances","⚠️ أدخل رقم الباتش":"⚠️ Enter the batch number","⚠️ الكمية أكبر من الرصيد المتاح":"⚠️ Quantity exceeds the available balance",
 "من":"From","إلى":"To","تحويل صنف":"Transfer an item","💾 تنفيذ التحويل":"💾 Execute transfer","✅ تم التحويل":"✅ Transfer done","⚠️ المصدر والوجهة متطابقان":"⚠️ Source and destination are the same","⚠️ لا يوجد رصيد متاح للتحويل":"⚠️ No balance available to transfer",
 "آخر التحويلات":"Recent transfers","كود الصنف":"Item code","وصف الصنف":"Item description","💾 حفظ الصنف":"💾 Save item","✏️ تعديل صنف":"✏️ Edit item","⚠️ الكود أو الاسم مسجل مسبقاً":"⚠️ The code or name already exists","لا توجد أصناف":"No items","الأصناف":"Items","الإعدادات":"Settings","👥 المستخدمون":"👥 Users","🔑 الأدوار والصلاحيات":"🔑 Roles & permissions","📋 ملخص الصلاحيات":"📋 Permissions summary","الاسم":"Name","الدور (الوظيفة)":"Role (job title)","— بدون صلاحية":"— No access","فعّال":"Active","(حسابك)":"(you)",
@@ -146,6 +146,7 @@ async function load() {
   houses = h.data || []; sum = (s.data || []).map(r => ({...r, fcr: r.weight_kg ? r.feed_kg / ((r.chicks - r.mortality) * r.weight_kg) : null})); render();
 }
 function render() {
+  if (document.body.classList) document.body.classList.remove("po-mode");
   if (!can(tab)) { const f = TABS.find(([t]) => can(t)); if (f) tab = f[0]; }
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t == tab));
   if (!houses.length && !["setup", "vet", "lab", "farms", "bio", "maint", "quality", "settings", "warehouse"].includes(tab)) return $("#m").innerHTML = `<div class="card"><p>لا توجد دورة أو عنابر بعد.</p><button onclick="tab='setup';render()">⚙️ إنشاء دورة جديدة</button></div>`;
@@ -172,15 +173,16 @@ function chart(vals, labels, o = {}) {
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">${grid}${b}${xl}</svg>`;
 }
 async function dash() {
-  const chicks = T("chicks"), mt = T("mortality"), ok = sum.filter(r => r.fcr), fcr = ok.reduce((a, r) => a + r.fcr, 0) / (ok.length || 1), avgM = mt / chicks * 100;
+  const chicks = T("chicks"), mt = T("mortality"), ok = sum.filter(r => r.fcr), fcr = ok.reduce((a, r) => a + r.fcr, 0) / (ok.length || 1), avgM = mt / chicks * 100, fpb = T("sold") > 0 ? T("feed_kg") / T("sold") : null;
   const {data: dl} = await sb.from("daily_records").select("rec_date,mortality,feed_kg,houses!inner(cycle_id)").eq("houses.cycle_id", cur).order("rec_date");
   const by = {}; (dl || []).forEach(r => { const o = by[r.rec_date] ||= {m: 0, f: 0}; o.m += r.mortality || 0; o.f += +r.feed_kg || 0; });
   const days = Object.keys(by), dlb = days.map(d => d.slice(5)), hl = sum.map(r => "H" + r.no);
-  const kpi = [["🐥", "إجمالي الكتاكيت", n(chicks)], ["⚠️", "النفوق", n(mt)], ["📉", "نسبة النفوق %", n(avgM, 2)], ["🛒", "المباع", n(T("sold"))], ["🌾", "العلف المستهلك (طن)", n(T("feed_kg") / 1000, 1)], ["⚖️", "متوسط FCR", n(fcr, 3)]];
+  const kpi = [["🐥", "إجمالي الكتاكيت", n(chicks)], ["⚠️", "النفوق", n(mt)], ["📉", "نسبة النفوق %", n(avgM, 2)], ["🛒", "المباع", n(T("sold"))], ["🌾", "العلف المستهلك (طن)", n(T("feed_kg") / 1000, 1)], ["⚖️", "متوسط FCR", n(fcr, 3)], ["🍗", "العلف / طائر (كجم)", n(fpb, 3)]];
   const cd = (t, c) => `<div class="card"><div class="k" style="margin-bottom:6px;font-weight:600">${t}</div>${c}</div>`;
   $("#m").innerHTML = `<div class="grid">${kpi.map(([i, k, v]) => `<div class="card"><div class="k"><span>${i}</span> ${k}</div><div class="v">${v}</div></div>`).join("")}</div><div class="c2" style="margin-top:12px">
   ${cd("نسبة النفوق % لكل عنبر", chart(sum.map(r => +r.mortality_pct), hl, {dec: 2, warn: 5, avg: avgM}))}
   ${cd("FCR لكل عنبر", chart(sum.map(r => r.fcr || 0), hl, {dec: 2, avg: fcr}))}
+  ${cd("العلف / طائر لكل عنبر (كجم)", chart(sum.map(r => r.sold > 0 ? r.feed_kg / r.sold : 0), hl, {dec: 3, avg: fpb}))}
   ${cd("النفوق اليومي", chart(days.map(d => by[d].m), dlb, {line: 1}))}
   ${cd("استهلاك العلف اليومي (طن)", chart(days.map(d => by[d].f / 1000), dlb, {line: 1, dec: 1}))}</div>`;
 }
@@ -211,16 +213,35 @@ async function entry() {
 function editH(b) { const el = b.closest("[data-h]"); el.dataset.saved = "2"; el.querySelectorAll("input").forEach(i => i.disabled = false); b.closest(".row").remove(); toast("✏️ عدّل القيم ثم اضغط حفظ الكل"); }
 async function delH(id) { if (!confirm("حذف السجل؟")) return; const {error} = await sb.from("daily_records").delete().eq("id", id); if (error) return toast("❌ " + error.message, 1); toast("🗑 تم الحذف"); refreshSum(); render(); }
 function rep() {
-  const hd = ["العنبر", "الكتاكيت", "النفوق", "النفوق %", "الصلاحية %", "المباع", "العلف (كجم)", "الوزن (كجم)", "FCR", "العمر"];
-  const body = sum.map(r => [r.no, n(r.chicks), n(r.mortality), n(r.mortality_pct, 2), n(r.livability_pct, 2), n(r.sold), n(r.feed_kg), n(r.weight_kg, 3), n(r.fcr, 3), r.age]);
-  body.push(["الإجمالي", n(T("chicks")), n(T("mortality")), n(T("mortality") / T("chicks") * 100, 2), n(100 - T("mortality") / T("chicks") * 100, 2), n(T("sold")), n(T("feed_kg")), "", "", ""]);
-  $("#m").innerHTML = `<div class="row"><button id="csv">⬇️ تصدير CSV</button><button class="ghost" onclick="print()">🖨️ طباعة / PDF</button></div><h2>ملخص الدورة (يعادل ورقة Preview)</h2>
-  <div class="card tw"><table><tr>${hd.map(h => `<th>${h}</th>`).join("")}</tr>${body.map(r => `<tr>${r.map((c, i) => `<td class="${i == 3 && parseFloat(c) > 5 ? "bad" : ""}">${c}</td>`).join("")}</tr>`).join("")}</table></div>
-  <h2>السجل اليومي لعنبر</h2><div class="row"><select id="hh" data-keep="1">${houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join("")}</select></div><div class="card tw" id="dl"></div>`;
-  $("#csv").onclick = () => { const b = new Blob(["\ufeff" + [hd, ...body].map(r => r.map(c => '"' + (EN ? tr(String(c)) : c) + '"').join(",")).join("\n")], {type: "text/csv"}), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "cycle-report.csv"; a.click(); };
-  const daily = async () => { const {data} = await sb.from("daily_records").select("*").eq("house_id", $("#hh").value).order("rec_date"); let cum = 0;
-    $("#dl").innerHTML = `<table><tr><th>التاريخ</th><th>العمر</th><th>النفوق</th><th>التراكمي</th><th>العلف</th><th>الوزن جم</th><th>المباع</th></tr>${(data || []).map(r => `<tr><td>${r.rec_date}</td><td>${r.age}</td><td style="${mcol(r.mortality)}">${r.mortality}</td><td>${cum += r.mortality}</td><td>${n(r.feed_kg)}</td><td>${n(r.avg_weight_g)}</td><td>${r.sold}</td></tr>`).join("")}</table>`; };
+  const cyc = cycles.find(c => c.id == cur) || {}, ttl = `${(cyc.farms || {}).name || ""} — دورة ${cyc.cycle_no || ""}`;
+  const HD = ["العنبر", "الكتاكيت", "النفوق", "النفوق %", "النسبة الحياتية %", "المباع", "الرصيد المتبقي", "العلف (كجم)", "العلف / طائر (كجم)", "متوسط الوزن (كجم)", "FCR", "العمر"], DEC = [0, 0, 0, 2, 2, 0, 0, 0, 3, 3, 3, 1];
+  const live = r => r.chicks - r.mortality, S = f => sum.reduce((a, r) => a + (+r[f] || 0), 0), W = sum.filter(r => r.weight_kg > 0), LW = W.reduce((a, r) => a + live(r) * r.weight_kg, 0), LB = W.reduce((a, r) => a + live(r), 0), A = sum.filter(r => r.age != null);
+  const tc = S("chicks"), tm = S("mortality"), ts = S("sold"), tf = S("feed_kg");
+  const R = sum.map(r => [r.no, +r.chicks, +r.mortality, r.mortality_pct == null ? null : +r.mortality_pct, r.livability_pct == null ? null : +r.livability_pct, +r.sold, r.chicks - r.mortality - r.sold, +r.feed_kg, r.sold > 0 ? r.feed_kg / r.sold : null, r.weight_kg == null ? null : +r.weight_kg, r.fcr, r.age]);
+  const TOT = ["الإجمالي / المتوسط", tc, tm, tc ? tm / tc * 100 : null, tc ? 100 - tm / tc * 100 : null, ts, tc - tm - ts, tf, ts > 0 ? tf / ts : null, LB ? LW / LB : null, LW ? W.reduce((a, r) => a + +r.feed_kg, 0) / LW : null, A.length ? A.reduce((a, r) => a + r.age, 0) / A.length : null];
+  const fmt = (v, i) => typeof v == "string" ? v : n(v, DEC[i]), raw = r => r.map(v => typeof v == "number" ? +v.toFixed(4) : (v == null ? "" : v));
+  const head = (id, t) => `<div class="pr"><h2 id="${id}">${t}</h2><div>${ttl} · <span>تاريخ الطباعة:</span> ${tdy()}</div></div>`;
+  $("#m").innerHTML = `<div class="rblock" id="rb1"><div class="row np" style="justify-content:space-between"><h2 style="margin:0">ملخص الدورة (يعادل ورقة Preview)</h2><div class="row" style="margin:0"><button id="sx">📗 تصدير Excel</button><button id="sp" class="ghost">📕 تصدير PDF</button></div></div>${head("t1", "ملخص الدورة (يعادل ورقة Preview)")}
+  <div class="card tw" style="margin-top:10px"><table><tr>${HD.map(h => `<th>${h}</th>`).join("")}</tr>${[...R, TOT].map((r, k) => `<tr ${k == R.length ? 'style="font-weight:700;background:var(--bg)"' : ""}>${r.map((c, i) => `<td class="${i == 3 && c > 5 ? "bad" : ""}">${fmt(c, i)}</td>`).join("")}</tr>`).join("")}</table></div></div>
+  <div class="rblock" id="rb2" style="margin-top:18px"><div class="row np" style="justify-content:space-between"><div class="row" style="margin:0"><h2 style="margin:0">السجل اليومي لعنبر</h2><select id="hh" data-keep="1">${houses.map(h => `<option value="${h.id}">عنبر ${h.no}</option>`).join("")}</select></div><div class="row" style="margin:0"><button id="dx">📗 تصدير Excel</button><button id="dp" class="ghost">📕 تصدير PDF</button></div></div>${head("t2", "")}<div class="card tw" id="dl" style="margin-top:10px"></div></div>`;
+  const xl = (file, sheet, hd, rows) => { if (!window.XLSX) return alert("تعذر تحميل مكتبة Excel (تحقق من الإنترنت)"); const ws = XLSX.utils.aoa_to_sheet([hd.map(L_), ...rows]); ws["!cols"] = hd.map((h, i) => ({wch: i ? 14 : 18})); const wb = XLSX.utils.book_new(); if (!EN) wb.Workbook = {Views: [{RTL: true}]}; XLSX.utils.book_append_sheet(wb, ws, sheet); XLSX.writeFile(wb, file + "-" + tdy() + ".xlsx"); };
+  $("#sx").onclick = () => xl("cycle-summary", "Summary", HD, [...R, TOT].map((r, k) => { const x = raw(r); if (k == R.length) x[0] = L_(x[0]); return x; }));
+  $("#sp").onclick = () => printBlock("rb1");
+  let DR = [], dno = "";
+  const DH = ["التاريخ", "العمر", "النفوق", "التراكمي", "العلف", "الوزن جم", "المباع"];
+  const daily = async () => {
+    dno = (houses.find(h => h.id == $("#hh").value) || {}).no || ""; const {data} = await sb.from("daily_records").select("*").eq("house_id", $("#hh").value).order("rec_date"); let cum = 0;
+    DR = (data || []).map(r => [r.rec_date, r.age, r.mortality, cum += (r.mortality || 0), r.feed_kg == null ? null : +r.feed_kg, r.avg_weight_g == null ? null : +r.avg_weight_g, r.sold]);
+    $("#t2").innerHTML = `<span>السجل اليومي لعنبر</span> ${dno}`;
+    $("#dl").innerHTML = `<table><tr>${DH.map(h => `<th>${h}</th>`).join("")}</tr>${DR.map(r => `<tr><td>${r[0]}</td><td>${r[1] ?? ""}</td><td style="${mcol(r[2])}">${r[2] ?? ""}</td><td>${r[3]}</td><td>${n(r[4])}</td><td>${n(r[5])}</td><td>${r[6] ?? ""}</td></tr>`).join("")}</table>`;
+  };
   $("#hh").onchange = daily; daily();
+  $("#dx").onclick = () => xl("house-" + dno + "-daily", "House " + dno, DH, DR.map(raw));
+  $("#dp").onclick = () => printBlock("rb2");
+}
+function printBlock(id) {
+  if (document.body.classList) document.body.classList.add("po-mode"); document.querySelectorAll("#m .po").forEach(e => e.classList.remove("po")); document.getElementById(id).classList.add("po");
+  window.addEventListener("afterprint", () => { if (document.body.classList) document.body.classList.remove("po-mode"); }, {once: true}); print();
 }
 function setup() {
   const sh = houses.length ? `<h2>أعداد الكتاكيت في العنابر الحالية</h2><div class="hs">${houses.map(h => `<div class="card" data-hc="${h.id}"><b>عنبر ${h.no}</b><label>عدد الكتاكيت</label><input type="number" data-f="chicks" value="${h.chicks ?? 0}"><label>تاريخ التسكين</label><input type="date" data-f="placement_date" value="${h.placement_date || ""}"><label>المصدر</label><input data-f="chick_source" list="srcs" value="${esc(h.chick_source || "")}"><label>ملاحظات</label><textarea data-f="notes" rows="2">${esc(h.notes)}</textarea></div>`).join("")}</div><div class="row" style="margin-top:10px"><button id="sh">💾 حفظ الأعداد</button></div>` : "";
@@ -750,7 +771,7 @@ async function loadMe() {
   if (ME.active) { const {data} = await sb.from("role_tabs").select("tab,level").eq("role_id", u.role_id); (data || []).forEach(r => ME.tabs[r.tab] = r.level); }
 }
 // وضع القراءة فقط: يقفل الإدخال ويخفي أزرار التغيير ويُبقي التصفية والتصدير والطباعة
-const KEEP_ID = ["fa", "fx", "fp", "ra", "rx", "rp", "xa", "xx", "xp", "csv"];
+const KEEP_ID = ["fa", "fx", "fp", "ra", "rx", "rp", "xa", "xx", "xp", "csv", "sx", "sp", "dx", "dp"];
 const keepBtn = (oc, id, keep) => !!keep || KEEP_ID.includes(id) || (/^(sub|vsub|lsub|msub|qsec|fsf|ssub|wsub|print\()/.test(oc) && !/(vsub='new'|lsub='sched'|wsub='mv'|wsub='xfer')/.test(oc));
 function applyRO() {
   const m = document.getElementById("m"); if (!m || !ME) return;
